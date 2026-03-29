@@ -28,7 +28,11 @@ export const useAuthStore = create<AuthState>()(
             selectedCountry: null,
 
             setIsAuthenticated: (value: boolean) => set({ isAuthenticated: value }),
-            setUser: (user: User | null) => set({ user: user, isAuthenticated: !!user }),
+            setUser: (user: User | null) => set({ 
+                user: user, 
+                isAuthenticated: !!user,
+                selectedCountry: (user as any)?.country || get().selectedCountry 
+            }),
             setLoading: (loading: boolean) => set({ isLoading: loading }),
             setSelectedCountry: (country: string | null) => set({ selectedCountry: country }),
 
@@ -37,12 +41,16 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const user = await getCurrentUser();
                     if (user) {
-                        set({ user: user as unknown as User, isAuthenticated: true });
+                        set({ 
+                            user: user as unknown as User, 
+                            isAuthenticated: true,
+                            selectedCountry: (user as any).country || null 
+                        });
                     } else {
-                        set({ user: null, isAuthenticated: false });
+                        set({ user: null, isAuthenticated: false, selectedCountry: null });
                     }
                 } catch (error) {
-                    set({ user: null, isAuthenticated: false });
+                    set({ user: null, isAuthenticated: false, selectedCountry: null });
                 } finally {
                     set({ isLoading: false });
                 }
@@ -52,7 +60,7 @@ export const useAuthStore = create<AuthState>()(
                 set({ isLoading: true });
                 try {
                     await signOut();
-                    set({ user: null, isAuthenticated: false });
+                    set({ user: null, isAuthenticated: false, selectedCountry: null });
                 } catch (error) {
                     // Logout error
                 } finally {

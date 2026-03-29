@@ -1,7 +1,7 @@
 import { getFileUrl } from '@/lib/appwrite';
 import { useAdsStore } from '@/store/ads.store';
 import { useAuthStore } from '@/store/auth.store';
-import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -9,14 +9,14 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile() {
-  const { user } = useAuthStore();
+  const { user, selectedCountry } = useAuthStore();
   const { ads, fetchUserAds } = useAdsStore();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Active');
 
   useEffect(() => {
     fetchUserAds();
-  }, [fetchUserAds]);
+  }, [fetchUserAds, selectedCountry]);
 
   const myAds = ads.filter(ad => {
       const sellerId = typeof ad.seller === 'object' ? ad.seller.$id : ad.seller;
@@ -54,17 +54,8 @@ export default function Profile() {
 
         {/* Profile Info */}
         <View className="items-center mt-2">
-          <View className="relative">
-            <View className="h-24 w-24 rounded-full border-4 border-white overflow-hidden bg-gray-200">
-              <Image 
-                source={{ uri: getFileUrl(user?.prefs?.avatar) || 'https://i.pravatar.cc/300?img=11' }} 
-                style={{ width: '100%', height: '100%' }}
-                contentFit="cover"
-              />
-            </View>
-            <View className="absolute bottom-0 right-0 bg-[#A3D139] rounded-full p-1 border-2 border-[#FDFBF7]">
-              <Ionicons name="checkmark" size={12} color="white" />
-            </View>
+          <View className="w-20 h-20 rounded-full bg-[#013B28]/10 items-center justify-center">
+            <Ionicons name="person" size={40} color="#013B28" />
           </View>
           <Text className="text-xl font-bold text-[#013B28] mt-3">{user?.name || 'Ahmed Ali'}</Text>
           <Text className="text-gray-500 text-sm">Member since {user?.registration ? new Date(user.registration).getFullYear() : '2024'}</Text>
@@ -77,15 +68,12 @@ export default function Profile() {
             <Text className="text-gray-400 text-xs mt-1">ACTIVE</Text>
           </View>
           <View className="items-center flex-1 border-r border-gray-100">
-            <Text className="text-xl font-bold text-[#013B28]">0</Text>
-            <Text className="text-gray-400 text-xs mt-1">SOLD</Text>
+            <Text className="text-xl font-bold text-[#013B28]">{pendingAds.length}</Text>
+            <Text className="text-gray-400 text-xs mt-1">PENDING</Text>
           </View>
           <View className="items-center flex-1">
-            <View className="flex-row items-center">
-              <Text className="text-xl font-bold text-[#013B28]">0.0</Text>
-              <FontAwesome name="star" size={14} color="#FFC107" style={{ marginLeft: 4 }} />
-            </View>
-            <Text className="text-gray-400 text-xs mt-1">RATING</Text>
+            <Text className="text-xl font-bold text-[#013B28]">{disapprovedAds.length}</Text>
+            <Text className="text-gray-400 text-xs mt-1">DISAPPROVED</Text>
           </View>
         </View>
 

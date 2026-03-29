@@ -12,11 +12,11 @@ import { createAd, getAllCategories } from '../../lib/appwrite'; // Import getAl
 
 export default function PostAd() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, selectedCountry } = useAuthStore();
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [country, setCountry] = useState('kenya');
+  const [country, setCountry] = useState(selectedCountry?.toLowerCase() || 'kenya');
   const [city, setCity] = useState('');
   const [price, setPrice] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -128,8 +128,14 @@ export default function PostAd() {
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
         style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+        <ScrollView 
+          className="flex-1" 
+          showsVerticalScrollIndicator={false} 
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }}
+          keyboardShouldPersistTaps="handled"
+        >
           
           {/* Images Section */}
           <View className="px-4 mt-6">

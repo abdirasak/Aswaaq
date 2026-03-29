@@ -4,14 +4,14 @@ import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,6 +26,7 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -34,6 +35,7 @@ const SignIn = () => {
     }
 
     setIsSubmitting(true);
+    setHasError(false); // Reset error state on new attempt
 
     try {
       const session = await signIn(email, password);
@@ -49,6 +51,7 @@ const SignIn = () => {
       }
       router.replace('/(tabs)');
     } catch (error: any) {
+      setHasError(true); // Set error state when credentials are incorrect
       Alert.alert('Error', error.message);
     } finally {
       setIsSubmitting(false);
@@ -64,10 +67,11 @@ const SignIn = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 40 }}
+          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 40 }}
           keyboardShouldPersistTaps="handled"
         >
           {/* Logo & Header */}
@@ -141,18 +145,20 @@ const SignIn = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Password Reset Info */}
-          <View className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mt-8">
-            <View className="flex-row items-start">
-              <Ionicons name="information-circle-outline" size={20} color="#3B82F6" className="mt-0.5" />
-              <View className="ml-3 flex-1">
-                <Text className="text-blue-900 font-semibold text-sm">Password Help</Text>
-                <Text className="text-blue-700 text-xs mt-1 leading-4">
-                  Click "Forgot password?" to receive a reset link via email. The link will expire in 1 hour for security.
-                </Text>
+          {/* Password Reset Info - Only show on error */}
+          {hasError && (
+            <View className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mt-8">
+              <View className="flex-row items-start">
+                <Ionicons name="warning-outline" size={20} color="#F97316" className="mt-0.5" />
+                <View className="ml-3 flex-1">
+                  <Text className="text-orange-900 font-semibold text-sm">Password Help</Text>
+                  <Text className="text-orange-700 text-xs mt-1 leading-4">
+                    Having trouble signing in? Click "Forgot password?" to receive a reset link via email. The link will expire in 1 hour for security.
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
+          )}
 
           {/* Footer */}
           <View className="flex-row justify-center mt-auto pt-10">

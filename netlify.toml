@@ -1,0 +1,9 @@
+[build]
+  publish = "web-redirect"
+  command = ""
+
+# Optional: redirect /reset-password to /reset-password/ for consistency
+[[redirects]]
+  from = "/reset-password"
+  to = "/reset-password/index.html"
+  status = 200

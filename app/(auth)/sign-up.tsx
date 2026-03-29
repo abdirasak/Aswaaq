@@ -4,14 +4,14 @@ import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -50,14 +50,14 @@ const SignUp = () => {
     setIsSubmitting(true);
 
     try {
-      const newUser = await createUser(email, password, fullName);
+      const newUser = await createUser(email, password, fullName, phone);
       if (newUser) {
         // Since createUser in appwrite.ts already creates a session, 
         // we just need to update the store and redirect
         setUser(newUser as any);
         setIsAuthenticated(true);
       }
-      router.replace('/(auth)/country');
+      router.replace('/(tabs)/country');
     } catch (error: any) {
       Alert.alert('Error', error.message);
     } finally {
@@ -80,10 +80,12 @@ const SignUp = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 30 }}
+          keyboardShouldPersistTaps="handled"
         >
           {/* Logo & Header */}
           <View className="items-center mb-8">

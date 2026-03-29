@@ -1,19 +1,36 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Dimensions, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFileUrl } from '../../lib/appwrite';
 import { useAdsStore } from '../../store/ads.store';
+import { useAuthStore } from '../../store/auth.store';
 import { useLikedAdsStore } from '../../store/likedads.store';
 
 const { width } = Dimensions.get('window');
 
 export default function LikedAds() {
   const router = useRouter();
-  const { ads } = useAdsStore();
-  const { likedAdIds, toggleLike } = useLikedAdsStore();
+  const { ads, fetchAds } = useAdsStore();
+  const { user, selectedCountry } = useAuthStore();
+  const { likedAdIds, toggleLike, loadUserLikes, saveUserLikes } = useLikedAdsStore();
+
+  // Load user's liked ads when component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      loadUserLikes(user.$id);
+    }
+    fetchAds();
+  }, [user, loadUserLikes, fetchAds, selectedCountry]);
+
+  // Save liked ads when they change
+  useEffect(() => {
+    if (user && likedAdIds.length > 0) {
+      saveUserLikes(user.$id);
+    }
+  }, [likedAdIds, user, saveUserLikes]);
 
   const likedProducts = useMemo(() => {
     return ads.filter(ad => likedAdIds.includes(ad.$id));

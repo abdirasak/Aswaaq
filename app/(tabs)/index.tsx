@@ -7,7 +7,9 @@ import {
   Dimensions,
   GestureResponderEvent,
   Keyboard,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -133,8 +135,8 @@ const getCategoryImage = (name: string) => {
 const HomeScreen = () => {
   const router = useRouter();
   const { ads, categories, isLoading, fetchAds, fetchCategories } = useAdsStore();
-  const { selectedCountry } = useAuthStore();
-  const { likedAdIds, toggleLike } = useLikedAdsStore();
+  const { selectedCountry, user } = useAuthStore();
+  const { likedAdIds, toggleLike, setLikedAds, loadUserLikes, saveUserLikes } = useLikedAdsStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -148,6 +150,23 @@ const HomeScreen = () => {
   const [maxPrice, setMaxPrice] = useState('');
 
   const isFilterActive = sortBy !== 'newest' || minPrice !== '' || maxPrice !== '';
+
+  // Load user-specific liked ads when user logs in
+  useEffect(() => {
+    if (user) {
+      loadUserLikes(user.$id);
+    } else {
+      // Clear current likes when user logs out, but don't delete from storage
+      setLikedAds([]);
+    }
+  }, [user, loadUserLikes, setLikedAds]);
+
+  // Save liked ads when they change (only if user is logged in)
+  useEffect(() => {
+    if (user && likedAdIds.length > 0) {
+      saveUserLikes(user.$id);
+    }
+  }, [likedAdIds, user, saveUserLikes]);
 
   // Debounce search query to reduce re-renders
   useEffect(() => {
@@ -226,21 +245,10 @@ const HomeScreen = () => {
   const featuredProducts = useMemo(() => {
     const featured = filteredAds.filter(p => p.featured);
     
-    // Sort by newest first
+    // Sort by newest first and return only featured ads
     const sortedFeatured = featured.sort((a, b) => new Date(b.$createdAt).getTime() - new Date(a.$createdAt).getTime());
     
-    // If we have less than 10 featured ads, fill with recent non-featured ads
-    if (sortedFeatured.length < 10) {
-      const nonFeatured = filteredAds
-        .filter(p => !p.featured)
-        .sort((a, b) => new Date(b.$createdAt).getTime() - new Date(a.$createdAt).getTime());
-      
-      const needed = 10 - sortedFeatured.length;
-      const result = [...sortedFeatured, ...nonFeatured.slice(0, needed)];
-      return result;
-    }
-    
-    return sortedFeatured.slice(0, 10);
+    return sortedFeatured;
   }, [filteredAds]);
   
   const recentProducts = useMemo(() => {
@@ -258,13 +266,19 @@ const HomeScreen = () => {
 
   const handleLikePress = useCallback((adId: string, e?: GestureResponderEvent) => {
     e?.stopPropagation();
-    toggleLike(adId);
-  }, [toggleLike]);
+    // Only allow liking if user is authenticated
+    if (user) {
+      toggleLike(adId);
+    } else {
+      // Optionally, you could navigate to login or show a message
+      console.log('Please login to like ads');
+    }
+  }, [toggleLike, user]);
 
   useEffect(() => {
     fetchAds();
     fetchCategories();
-  }, [selectedCountry]);
+  }, [selectedCountry, fetchAds, fetchCategories]);
 
   if (isLoading && ads.length === 0) {
     return (
@@ -367,97 +381,102 @@ const HomeScreen = () => {
       >
         <TouchableWithoutFeedback onPress={() => setFilterModalVisible(false)}>
           <View className="flex-1 bg-black/50 justify-end">
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View className="bg-white rounded-t-3xl p-6 h-[70%]">
-                <View className="flex-row justify-between items-center mb-6">
-                  <Text className="text-2xl font-bold text-primary">Filter & Sort</Text>
-                  <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
-                    <Ionicons name="close" size={24} color="#000" />
-                  </TouchableOpacity>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              className="w-full"
+            >
+              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View className="bg-white rounded-t-3xl p-6 h-[500px]">
+                  <View className="flex-row justify-between items-center mb-6">
+                    <Text className="text-2xl font-bold text-primary">Filter & Sort</Text>
+                    <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
+                      <Ionicons name="close" size={24} color="#000" />
+                    </TouchableOpacity>
+                  </View>
+
+                  <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                    {/* Sort Options */}
+                    <View className="mb-6">
+                      <Text className="text-lg font-bold text-primary mb-3">Sort By</Text>
+                      <View className="flex-row flex-wrap gap-3">
+                        <TouchableOpacity 
+                          onPress={() => setSortBy('newest')}
+                          className={`px-4 py-2 rounded-full border ${sortBy === 'newest' ? 'bg-primary border-primary' : 'bg-white border-gray-200'}`}
+                        >
+                          <Text className={sortBy === 'newest' ? 'text-white font-semibold' : 'text-gray-600 font-semibold'}>Newest</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                          onPress={() => setSortBy('price_asc')}
+                          className={`px-4 py-2 rounded-full border ${sortBy === 'price_asc' ? 'bg-primary border-primary' : 'bg-white border-gray-200'}`}
+                        >
+                          <Text className={sortBy === 'price_asc' ? 'text-white font-semibold' : 'text-gray-600 font-semibold'}>Price: Low to High</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                          onPress={() => setSortBy('price_desc')}
+                          className={`px-4 py-2 rounded-full border ${sortBy === 'price_desc' ? 'bg-primary border-primary' : 'bg-white border-gray-200'}`}
+                        >
+                          <Text className={sortBy === 'price_desc' ? 'text-white font-semibold' : 'text-gray-600 font-semibold'}>Price: High to Low</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+
+                    {/* Price Range */}
+                    <View className="mb-8">
+                      <Text className="text-lg font-bold text-primary mb-3">Price Range</Text>
+                      <View className="flex-row gap-4">
+                        <View className="flex-1">
+                          <Text className="text-gray-500 mb-1 ml-1 text-xs">Min Price</Text>
+                          <View className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100 flex-row items-center">
+                            <Text className="text-gray-400 mr-1">$</Text>
+                            <TextInput 
+                              placeholder="0" 
+                              value={minPrice} 
+                              onChangeText={setMinPrice}
+                              keyboardType="numeric"
+                              className="flex-1 font-semibold text-primary"
+                            />
+                          </View>
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-gray-500 mb-1 ml-1 text-xs">Max Price</Text>
+                          <View className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100 flex-row items-center">
+                            <Text className="text-gray-400 mr-1">$</Text>
+                            <TextInput 
+                              placeholder="Any" 
+                              value={maxPrice} 
+                              onChangeText={setMaxPrice}
+                              keyboardType="numeric"
+                              className="flex-1 font-semibold text-primary"
+                            />
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Reset Filters */}
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setSortBy('newest');
+                        setMinPrice('');
+                        setMaxPrice('');
+                      }}
+                      className="flex-row justify-center items-center mb-4"
+                    >
+                      <Ionicons name="refresh-outline" size={18} color="#666" />
+                      <Text className="text-gray-500 font-semibold ml-2">Reset Filters</Text>
+                    </TouchableOpacity>
+
+                    {/* Apply Button */}
+                    <TouchableOpacity 
+                      onPress={() => setFilterModalVisible(false)}
+                      className="bg-primary py-4 rounded-2xl items-center shadow-lg shadow-primary/30 mb-6"
+                    >
+                      <Text className="text-white font-bold text-lg">Show {filteredAds.length} Results</Text>
+                    </TouchableOpacity>
+                  </ScrollView>
                 </View>
-
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  {/* Sort Options */}
-                  <View className="mb-6">
-                    <Text className="text-lg font-bold text-primary mb-3">Sort By</Text>
-                    <View className="flex-row flex-wrap gap-3">
-                      <TouchableOpacity 
-                        onPress={() => setSortBy('newest')}
-                        className={`px-4 py-2 rounded-full border ${sortBy === 'newest' ? 'bg-primary border-primary' : 'bg-white border-gray-200'}`}
-                      >
-                        <Text className={sortBy === 'newest' ? 'text-white font-semibold' : 'text-gray-600 font-semibold'}>Newest</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity 
-                        onPress={() => setSortBy('price_asc')}
-                        className={`px-4 py-2 rounded-full border ${sortBy === 'price_asc' ? 'bg-primary border-primary' : 'bg-white border-gray-200'}`}
-                      >
-                        <Text className={sortBy === 'price_asc' ? 'text-white font-semibold' : 'text-gray-600 font-semibold'}>Price: Low to High</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity 
-                        onPress={() => setSortBy('price_desc')}
-                        className={`px-4 py-2 rounded-full border ${sortBy === 'price_desc' ? 'bg-primary border-primary' : 'bg-white border-gray-200'}`}
-                      >
-                        <Text className={sortBy === 'price_desc' ? 'text-white font-semibold' : 'text-gray-600 font-semibold'}>Price: High to Low</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-
-                  {/* Price Range */}
-                  <View className="mb-8">
-                    <Text className="text-lg font-bold text-primary mb-3">Price Range</Text>
-                    <View className="flex-row gap-4">
-                      <View className="flex-1">
-                        <Text className="text-gray-500 mb-1 ml-1 text-xs">Min Price</Text>
-                        <View className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100 flex-row items-center">
-                          <Text className="text-gray-400 mr-1">$</Text>
-                          <TextInput 
-                            placeholder="0" 
-                            value={minPrice} 
-                            onChangeText={setMinPrice}
-                            keyboardType="numeric"
-                            className="flex-1 font-semibold text-primary"
-                          />
-                        </View>
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-gray-500 mb-1 ml-1 text-xs">Max Price</Text>
-                        <View className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100 flex-row items-center">
-                          <Text className="text-gray-400 mr-1">$</Text>
-                          <TextInput 
-                            placeholder="Any" 
-                            value={maxPrice} 
-                            onChangeText={setMaxPrice}
-                            keyboardType="numeric"
-                            className="flex-1 font-semibold text-primary"
-                          />
-                        </View>
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* Reset Filters */}
-                  <TouchableOpacity 
-                    onPress={() => {
-                      setSortBy('newest');
-                      setMinPrice('');
-                      setMaxPrice('');
-                    }}
-                    className="flex-row justify-center items-center mb-4"
-                  >
-                    <Ionicons name="refresh-outline" size={18} color="#666" />
-                    <Text className="text-gray-500 font-semibold ml-2">Reset Filters</Text>
-                  </TouchableOpacity>
-                </ScrollView>
-
-                {/* Apply Button */}
-                <TouchableOpacity 
-                  onPress={() => setFilterModalVisible(false)}
-                  className="bg-primary py-4 rounded-2xl items-center shadow-lg shadow-primary/30"
-                >
-                  <Text className="text-white font-bold text-lg">Show {filteredAds.length} Results</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
+              </TouchableWithoutFeedback>
+            </KeyboardAvoidingView>
           </View>
         </TouchableWithoutFeedback>
       </Modal>

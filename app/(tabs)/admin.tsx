@@ -2,13 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -83,7 +82,7 @@ const AdminDashboard = () => {
   return (
     <SafeAreaView className="flex-1 bg-[#F9F7E8]">
       {/* Header */}
-      <View className="px-6 py-4 flex-row items-center justify-between">
+      <View className="px-6 py-4 flex-row items-center">
         <View className="flex-row items-center">
           <View className="relative">
             {/* Admin Avatar Placeholder or from User Profile */}
@@ -98,23 +97,6 @@ const AdminDashboard = () => {
             <Text className="text-xl font-bold text-[#064229]">Admin Dashboard</Text>
             <Text className="text-[#064229]/60 text-sm">Hello, {user?.name || 'Admin'}</Text>
           </View>
-        </View>
-        <TouchableOpacity className="bg-white p-2.5 rounded-full shadow-sm">
-          <Ionicons name="filter" size={20} color="#064229" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Search Bar */}
-      <View className="px-6 mt-2">
-        <View className="bg-white flex-row items-center px-4 py-3 rounded-2xl border border-gray-100 shadow-sm">
-          <Ionicons name="search-outline" size={20} color="#666" />
-          <TextInput
-            placeholder="Search ads..."
-            placeholderTextColor="#999"
-            className="flex-1 ml-3 text-base"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
         </View>
       </View>
 
@@ -218,20 +200,20 @@ const AdminDashboard = () => {
                     </View>
 
                     {/* Action Buttons - Only show for Pending or when changing decision */}
-                    <View className="flex-row gap-3 mt-5">
+                    <View className="flex-row gap-2 mt-5">
                     {/* Featured Toggle Button */}
                     <TouchableOpacity 
                         onPress={() => handleFeaturedToggle(ad.$id, ad.featured || false)}
-                        className={`px-4 py-3.5 rounded-2xl flex-row items-center justify-center ${
+                        className={`px-3 py-3.5 rounded-2xl flex-row items-center justify-center min-w-[100px] ${
                             ad.featured ? 'bg-[#FFD700] border border-[#FFD700]/30' : 'bg-gray-100 border border-gray-200'
                         }`}
                     >
                         <Ionicons 
                             name={ad.featured ? "star" : "star-outline"} 
-                            size={18} 
+                            size={16} 
                             color={ad.featured ? "#064229" : "#666"} 
                         />
-                        <Text className={`ml-2 font-bold text-sm ${
+                        <Text className={`ml-1.5 font-bold text-xs ${
                             ad.featured ? 'text-[#064229]' : 'text-gray-600'
                         }`}>
                             {ad.featured ? 'Featured' : 'Feature'}
@@ -241,19 +223,19 @@ const AdminDashboard = () => {
                     {activeTab !== 'Rejected' && (
                         <TouchableOpacity 
                             onPress={() => handleStatusUpdate(ad.$id, 'rejected')}
-                            className="flex-1 border border-[#064229]/10 py-3.5 rounded-2xl flex-row items-center justify-center"
+                            className="flex-1 border border-[#064229]/10 py-3.5 rounded-2xl flex-row items-center justify-center min-w-[100px]"
                         >
-                            <Ionicons name="close-outline" size={20} color="#064229" />
-                            <Text className="ml-2 font-bold text-[#064229]">Disapprove</Text>
+                            <Ionicons name="close-outline" size={18} color="#064229" />
+                            <Text className="ml-2 font-bold text-sm text-[#064229]">Disapprove</Text>
                         </TouchableOpacity>
                     )}
                     {activeTab !== 'Approved' && (
                         <TouchableOpacity 
                             onPress={() => handleStatusUpdate(ad.$id, 'approved')}
-                            className="flex-1 bg-[#A3D139] py-3.5 rounded-2xl flex-row items-center justify-center"
+                            className="flex-1 bg-[#A3D139] py-3.5 rounded-2xl flex-row items-center justify-center min-w-[100px] mr-2"
                         >
-                            <Ionicons name="checkmark-outline" size={20} color="#064229" />
-                            <Text className="ml-2 font-bold text-[#064229]">Approve</Text>
+                            <Ionicons name="checkmark-outline" size={18} color="#064229" />
+                            <Text className="ml-2 font-bold text-sm text-[#064229]">Approve</Text>
                         </TouchableOpacity>
                     )}
                     </View>
@@ -262,14 +244,6 @@ const AdminDashboard = () => {
             )}
         </ScrollView>
       )}
-
-      {/* Floating Filter Button */}
-      <TouchableOpacity
-        className="absolute bottom-8 right-6 w-16 h-16 bg-[#064229] rounded-full items-center justify-center shadow-lg"
-        style={{ elevation: 5 }}
-      >
-        <Ionicons name="options" size={30} color="#F9F7E8" />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };

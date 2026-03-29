@@ -86,6 +86,14 @@ export default function ShowAds() {
     }
   };
 
+  const handleMessageSeller = () => {
+    if (ad?.seller?.phone) {
+      Linking.openURL(`sms:${ad.seller.phone}`);
+    } else {
+      Alert.alert('Info', 'No phone number available for this seller.');
+    }
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 bg-[#FDFBF7] items-center justify-center">
@@ -219,7 +227,7 @@ export default function ShowAds() {
                 <Ionicons name="call" size={20} color="#fff" />
                 <Text className="ml-2 text-white font-bold">Call</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="flex-1 bg-[#C1D94C] flex-row items-center justify-center py-4 rounded-2xl">
+              <TouchableOpacity onPress={handleMessageSeller} className="flex-1 bg-[#C1D94C] flex-row items-center justify-center py-4 rounded-2xl">
                 <Ionicons name="chatbubble-ellipses" size={20} color="#064229" />
                 <Text className="ml-2 text-[#064229] font-bold">Message</Text>
               </TouchableOpacity>
