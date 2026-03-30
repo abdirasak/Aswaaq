@@ -3,7 +3,7 @@ import { Account, Client, Databases, ID, Query, Storage } from "react-native-app
 export const appwriteConfig = {
     endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!,
     projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!,
-    APPWRITE_PROJECT_NAME: "com.indexdesigns.iibiye",
+    APPWRITE_PROJECT_NAME: "com.indexdesigns.aswaaq",
     databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
     profileCollectionId: process.env.EXPO_PUBLIC_APPWRITE_PROFILE_COLLECTION_ID!,
     adsCollectionId: process.env.EXPO_PUBLIC_APPWRITE_ADS_COLLECTION_ID!,
@@ -435,6 +435,62 @@ export const createAd = async (adData: any) => {
                 status: 'pending',
                 featured: false, // Default to false, can be updated by admin
             }
+        );
+    } catch (error: any) {
+        throw new Error(error.message);
+    }
+}
+
+export const updateAd = async (adId: string, adData: any) => {
+    try {
+        const imageIds = [];
+        
+        // Handle images: if they are strings starting with 'http' or from Appwrite storage, they are already uploaded.
+        // If they are local URIs, we need to upload them.
+        for (const image of adData.images) {
+            if (typeof image === 'string' && (image.startsWith('http') || !image.includes('/'))) {
+                // If it's an ID (doesn't contain slashes) or a URL, keep it as is
+                // We store IDs in the database, so if it's already an ID, we just pass it back.
+                imageIds.push(image);
+            } else if (typeof image === 'string' && image.startsWith('file://') || image.includes('Cache') || image.includes('Picker')) {
+                // It's a local file URI, upload it
+                const id = await uploadFile(image);
+                imageIds.push(id);
+            } else if (typeof image === 'object' && image.$id) {
+                // It's an Appwrite file object
+                imageIds.push(image.$id);
+            } else {
+                // Fallback for any other case
+                imageIds.push(image);
+            }
+        }
+
+        return await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.adsCollectionId,
+            adId,
+            {
+                title: adData.title,
+                description: adData.description,
+                country: adData.country,
+                city: adData.city,
+                price: adData.price,
+                images: imageIds,
+                categories: adData.categoryId,
+                status: 'pending', // Reset to pending when edited
+            }
+        );
+    } catch (error: any) {
+        throw new Error(error.message);
+    }
+}
+
+export const deleteAd = async (adId: string) => {
+    try {
+        return await databases.deleteDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.adsCollectionId,
+            adId
         );
     } catch (error: any) {
         throw new Error(error.message);

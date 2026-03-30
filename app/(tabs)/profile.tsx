@@ -2,21 +2,123 @@ import { getFileUrl } from '@/lib/appwrite';
 import { useAdsStore } from '@/store/ads.store';
 import { useAuthStore } from '@/store/auth.store';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile() {
   const { user, selectedCountry } = useAuthStore();
-  const { ads, fetchUserAds } = useAdsStore();
+  const { ads, fetchUserAds, updateAd, deleteAd, categories, fetchCategories } = useAdsStore();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Active');
 
+  // Edit Modal State
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingAd, setEditingAd] = useState<any>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editPrice, setEditPrice] = useState('');
+  const [editCity, setEditCity] = useState('');
+  const [editCountry, setEditCountry] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [editImages, setEditImages] = useState<string[]>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   useEffect(() => {
     fetchUserAds();
-  }, [fetchUserAds, selectedCountry]);
+    fetchCategories();
+  }, [fetchUserAds, fetchCategories, selectedCountry]);
+
+  const handleEditPress = (ad: any) => {
+    setEditingAd(ad);
+    setEditTitle(ad.title);
+    setEditDescription(ad.description);
+    setEditPrice(ad.price.toString());
+    setEditCity(ad.city);
+    setEditCountry(ad.country || 'kenya');
+    
+    // Handle category relation
+    const categoryId = typeof ad.categories === 'object' ? ad.categories?.$id : ad.categories;
+    setEditCategory(categoryId || (categories.length > 0 ? categories[0].$id : ''));
+    
+    // Handle images: they might be objects or IDs
+    const currentImages = ad.images.map((img: any) => typeof img === 'object' ? img.$id : img);
+    setEditImages(currentImages);
+    
+    setIsEditModalVisible(true);
+  };
+
+  const pickEditImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      selectionLimit: 3 - editImages.length,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const selectedImages = result.assets.map(asset => asset.uri);
+      setEditImages([...editImages, ...selectedImages].slice(0, 3));
+    }
+  };
+
+  const removeEditImage = (index: number) => {
+    setEditImages(editImages.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateAd = async () => {
+    if (!editTitle || !editDescription || !editPrice || !editCity || editImages.length === 0) {
+      Alert.alert('Error', 'Please fill in all fields and add at least one image');
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await updateAd(editingAd.$id, {
+        title: editTitle,
+        description: editDescription,
+        price: parseFloat(editPrice),
+        city: editCity,
+        country: editCountry,
+        categoryId: editCategory,
+        images: editImages,
+      });
+      
+      Alert.alert('Success', 'Ad updated successfully and is now pending approval.');
+      setIsEditModalVisible(false);
+      fetchUserAds();
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to update ad');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteAd = (adId: string) => {
+    Alert.alert(
+      'Delete Ad',
+      'Are you sure you want to delete this ad? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteAd(adId);
+              fetchUserAds();
+            } catch (error: any) {
+              Alert.alert('Error', error.message || 'Failed to delete ad');
+            }
+          }
+        }
+      ]
+    );
+  };
 
   const myAds = ads.filter(ad => {
       const sellerId = typeof ad.seller === 'object' ? ad.seller.$id : ad.seller;
@@ -120,20 +222,32 @@ export default function Profile() {
             {currentAds.length > 0 ? (
               currentAds.map((ad) => (
                 <View key={ad.$id} className="bg-white p-3 rounded-2xl flex-row shadow-sm">
-                  <Image 
-                    source={{ uri: (ad.images && ad.images.length > 0 ? getFileUrl(ad.images[0]) : undefined) ?? 'https://via.placeholder.com/150' }} 
-                    style={{ width: 96, height: 96, borderRadius: 12 }}
-                    contentFit="cover"
-                    transition={200}
-                  />
+                  <View className="bg-gray-50 rounded-xl overflow-hidden">
+                    <Image 
+                      source={{ uri: (ad.images && ad.images.length > 0 ? getFileUrl(ad.images[0]) : undefined) ?? 'https://via.placeholder.com/150' }} 
+                      style={{ width: 96, height: 96 }}
+                      contentFit="contain"
+                      transition={200}
+                    />
+                  </View>
                   <View className="flex-1 ml-3 justify-between">
                     <View className="flex-row justify-between items-start">
                       <View className="flex-1 mr-2">
                         <Text className="font-bold text-[#013B28] text-base" numberOfLines={1}>{ad.title}</Text>
                         <Text className="text-gray-500 font-bold mt-1">${ad.price}</Text>
                       </View>
-                      <TouchableOpacity>
-                        <MaterialIcons name="more-vert" size={20} color="gray" />
+                      <TouchableOpacity onPress={() => {
+                        Alert.alert(
+                          'Manage Ad',
+                          'What would you like to do?',
+                          [
+                            { text: 'Edit', onPress: () => handleEditPress(ad) },
+                            { text: 'Delete', onPress: () => handleDeleteAd(ad.$id), style: 'destructive' },
+                            { text: 'Cancel', style: 'cancel' }
+                          ]
+                        );
+                      }}>
+                        <MaterialIcons name="more-vert" size={24} color="#013B28" />
                       </TouchableOpacity>
                     </View>
                     <View className="flex-row justify-between items-center mt-2">
@@ -170,6 +284,159 @@ export default function Profile() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Edit Ad Modal */}
+      <Modal
+        visible={isEditModalVisible}
+        animationType="slide"
+        onRequestClose={() => setIsEditModalVisible(false)}
+      >
+        <SafeAreaView className="flex-1 bg-[#FDFBF7]">
+          <View className="flex-row justify-between items-center px-4 py-4 border-b border-gray-100 bg-white">
+            <TouchableOpacity onPress={() => setIsEditModalVisible(false)}>
+              <Ionicons name="close" size={24} color="#013B28" />
+            </TouchableOpacity>
+            <Text className="text-xl font-bold text-[#013B28]">Edit Ad</Text>
+            <TouchableOpacity onPress={handleUpdateAd} disabled={isUpdating}>
+              {isUpdating ? (
+                <ActivityIndicator size="small" color="#013B28" />
+              ) : (
+                <Text className="text-[#013B28] font-bold">Save</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+          >
+            <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
+              {/* Images Section */}
+              <View className="mb-6">
+                <View className="flex-row justify-between items-center mb-4">
+                  <Text className="text-lg font-bold text-[#013B28]">Images</Text>
+                  <Text className="text-gray-400">{editImages.length}/3</Text>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-x-3">
+                  {editImages.length < 3 && (
+                    <TouchableOpacity 
+                      onPress={pickEditImage} 
+                      className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-2xl items-center justify-center bg-gray-50"
+                    >
+                      <Ionicons name="camera" size={24} color="#013B28" />
+                      <Text className="text-[10px] font-bold text-[#013B28] mt-1">Add Photo</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {editImages.map((img, index) => (
+                    <View key={index} className="w-24 h-24 rounded-2xl relative">
+                      <Image 
+                        source={{ uri: img.startsWith('http') ? img : (img.includes('/') ? img : (getFileUrl(img) ?? undefined)) }} 
+                        style={{ width: '100%', height: '100%', borderRadius: 16 }}
+                        contentFit="cover"
+                      />
+                      <TouchableOpacity 
+                        onPress={() => removeEditImage(index)} 
+                        className="absolute -top-1 -right-1 bg-red-500 rounded-full p-1 shadow-sm"
+                      >
+                        <Ionicons name="close" size={12} color="white" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+
+              {/* Form Fields */}
+              <View className="space-y-4 pb-10">
+                <View>
+                  <Text className="text-[#013B28] font-bold mb-2 ml-1">Title</Text>
+                  <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm">
+                    <TextInput 
+                      placeholder="Title" 
+                      value={editTitle} 
+                      onChangeText={setEditTitle} 
+                      className="py-4 text-[#013B28]" 
+                    />
+                  </View>
+                </View>
+
+                <View>
+                  <Text className="text-[#013B28] font-bold mb-2 ml-1">Category</Text>
+                  <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <Picker
+                      selectedValue={editCategory}
+                      onValueChange={(v) => setEditCategory(v)}
+                      style={{ height: 55 }}
+                    >
+                      {categories.map((cat) => (
+                        <Picker.Item key={cat.$id} label={cat.name} value={cat.$id} />
+                      ))}
+                    </Picker>
+                  </View>
+                </View>
+
+                <View className="flex-row gap-x-4">
+                  <View className="flex-1">
+                    <Text className="text-[#013B28] font-bold mb-2 ml-1">Country</Text>
+                    <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                      <Picker selectedValue={editCountry} onValueChange={(v) => setEditCountry(v)} style={{ height: 55 }}>
+                        <Picker.Item label="Kenya" value="kenya" />
+                        <Picker.Item label="Egypt" value="egypt" />
+                      </Picker>
+                    </View>
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-[#013B28] font-bold mb-2 ml-1">City</Text>
+                    <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm">
+                      <TextInput 
+                        placeholder="City" 
+                        value={editCity} 
+                        onChangeText={setEditCity} 
+                        className="py-4 text-[#013B28]" 
+                      />
+                    </View>
+                  </View>
+                </View>
+
+                <View>
+                  <Text className="text-[#013B28] font-bold mb-2 ml-1">Price ($)</Text>
+                  <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm">
+                    <TextInput 
+                      placeholder="Price" 
+                      value={editPrice} 
+                      onChangeText={setEditPrice} 
+                      keyboardType="numeric" 
+                      className="py-4 text-[#013B28]" 
+                    />
+                  </View>
+                </View>
+
+                <View>
+                  <Text className="text-[#013B28] font-bold mb-2 ml-1">Description</Text>
+                  <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm">
+                    <TextInput 
+                      placeholder="Description" 
+                      value={editDescription} 
+                      onChangeText={setEditDescription} 
+                      multiline 
+                      className="py-4 text-[#013B28] h-32" 
+                      textAlignVertical="top" 
+                    />
+                  </View>
+                </View>
+                
+                <TouchableOpacity 
+                  onPress={handleUpdateAd}
+                  disabled={isUpdating}
+                  className={`bg-[#013B28] py-4 rounded-2xl flex-row justify-center items-center mt-4 ${isUpdating ? 'opacity-70' : ''}`}
+                >
+                  {isUpdating ? <ActivityIndicator color="white" /> : <Text className="text-white font-bold text-lg">Update Ad</Text>}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }

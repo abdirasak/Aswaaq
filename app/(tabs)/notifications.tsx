@@ -150,11 +150,13 @@ export default function Notifications() {
                     {/* Ad Preview */}
                     <View className="flex-row items-center mt-3 bg-gray-50 rounded-xl p-2">
                         {notification.adImage ? (
-                            <Image
-                                source={{ uri: getFileUrl(notification.adImage) || undefined }}
-                                style={{ width: 40, height: 40, borderRadius: 8 }}
-                                contentFit="cover"
-                            />
+                            <View className="bg-white rounded-lg overflow-hidden border border-gray-100">
+                                <Image
+                                    source={{ uri: getFileUrl(notification.adImage) || undefined }}
+                                    style={{ width: 40, height: 40 }}
+                                    contentFit="contain"
+                                />
+                            </View>
                         ) : (
                             <View className="w-10 h-10 bg-gray-200 rounded-lg items-center justify-center">
                                 <Ionicons name="image-outline" size={16} color="#999" />

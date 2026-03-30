@@ -76,14 +76,14 @@ const SignIn = () => {
         >
           {/* Logo & Header */}
           <View className="items-center mb-10">
-            <View className="w-34 h-34 rounded-[24px] items-center justify-center mb-6 shadow-sm">
+            <View className="w-34 h-34 rounded-[28px] items-center justify-center mb-6 shadow-md bg-white">
               <Image
-                source={require('../../assets/images/iibiye_logo.png')}
-                style={{ width: 112, height: 112 }}
-                contentFit="contain"
+                source={require('../../assets/images/aswaaq_logo.jpg')}
+                style={{ width: 112, height: 112, borderRadius: 24 }}
+                contentFit="cover"
               />
             </View>
-            <Text className="text-4xl font-bold text-primary tracking-widest">IIBIYE</Text>
+            <Text className="text-4xl font-bold text-primary tracking-widest">Aswaaq</Text>
             <Text className="text-gray-500 mt-2 text-base">Welcome back to your marketplace</Text>
           </View>
 
@@ -162,7 +162,7 @@ const SignIn = () => {
 
           {/* Footer */}
           <View className="flex-row justify-center mt-auto pt-10">
-            <Text className="text-gray-500 font-medium">New to IIBIYE? </Text>
+            <Text className="text-gray-500 font-medium">New to Aswaaq? </Text>
             <Link href="/(auth)/sign-up" asChild>
               <TouchableOpacity>
                 <Text className="text-primary font-bold">Create an account</Text>

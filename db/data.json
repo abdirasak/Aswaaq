@@ -1,6 +1,6 @@
 [
   {
-    "productId": "IIBIYE001",
+    "productId": "ASWAAQ001",
     "name": "Toyota Corolla 2015",
     "category": "vehicles",
     "date": "2026-01-05",
@@ -13,7 +13,7 @@
     "isFeatured": true
   },
   {
-    "productId": "IIBIYE002",
+    "productId": "ASWAAQ002",
     "name": "Delivery Driver Job",
     "category": "jobs",
     "date": "2026-01-06",
@@ -26,7 +26,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE003",
+    "productId": "ASWAAQ003",
     "name": "Wooden Sofa Set",
     "category": "furniture",
     "date": "2026-01-06",
@@ -39,7 +39,7 @@
     "isFeatured": true
   },
   {
-    "productId": "IIBIYE004",
+    "productId": "ASWAAQ004",
     "name": "Plumbing Service",
     "category": "services",
     "date": "2026-01-07",
@@ -52,7 +52,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE005",
+    "productId": "ASWAAQ005",
     "name": "Math Tutor",
     "category": "turors",
     "date": "2026-01-07",
@@ -65,7 +65,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE006",
+    "productId": "ASWAAQ006",
     "name": "Men Casual Jacket",
     "category": "clothes",
     "date": "2026-01-08",
@@ -78,7 +78,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE007",
+    "productId": "ASWAAQ007",
     "name": "Bluetooth Headphones",
     "category": "electronics",
     "date": "2026-01-08",
@@ -91,7 +91,7 @@
     "isFeatured": true
   },
   {
-    "productId": "IIBIYE008",
+    "productId": "ASWAAQ008",
     "name": "Microwave Oven",
     "category": "household appliance",
     "date": "2026-01-09",
@@ -104,7 +104,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE009",
+    "productId": "ASWAAQ009",
     "name": "Honda CBR 150",
     "category": "motorcycles",
     "date": "2026-01-09",
@@ -117,7 +117,7 @@
     "isFeatured": true
   },
   {
-    "productId": "IIBIYE010",
+    "productId": "ASWAAQ010",
     "name": "Office Desk",
     "category": "furniture",
     "date": "2026-01-10",
@@ -130,7 +130,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE011",
+    "productId": "ASWAAQ011",
     "name": "House Cleaning Service",
     "category": "services",
     "date": "2026-01-10",
@@ -143,7 +143,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE012",
+    "productId": "ASWAAQ012",
     "name": "English Tutor",
     "category": "turors",
     "date": "2026-01-11",
@@ -156,7 +156,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE013",
+    "productId": "ASWAAQ013",
     "name": "Women Dress",
     "category": "clothes",
     "date": "2026-01-11",
@@ -169,7 +169,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE014",
+    "productId": "ASWAAQ014",
     "name": "Smart TV",
     "category": "electronics",
     "date": "2026-01-12",
@@ -182,7 +182,7 @@
     "isFeatured": true
   },
   {
-    "productId": "IIBIYE015",
+    "productId": "ASWAAQ015",
     "name": "Electric Kettle",
     "category": "household appliance",
     "date": "2026-01-12",
@@ -195,7 +195,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE016",
+    "productId": "ASWAAQ016",
     "name": "Yamaha Motorcycle",
     "category": "motorcycles",
     "date": "2026-01-13",
@@ -208,7 +208,7 @@
     "isFeatured": true
   },
   {
-    "productId": "IIBIYE017",
+    "productId": "ASWAAQ017",
     "name": "Pickup Truck",
     "category": "vehicles",
     "date": "2026-01-13",
@@ -221,7 +221,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE018",
+    "productId": "ASWAAQ018",
     "name": "Office Assistant Job",
     "category": "jobs",
     "date": "2026-01-14",
@@ -234,7 +234,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE019",
+    "productId": "ASWAAQ019",
     "name": "Washing Machine",
     "category": "household appliance",
     "date": "2026-01-14",
@@ -247,7 +247,7 @@
     "isFeatured": false
   },
   {
-    "productId": "IIBIYE020",
+    "productId": "ASWAAQ020",
     "name": "Laptop Repair Service",
     "category": "services",
     "date": "2026-01-15",

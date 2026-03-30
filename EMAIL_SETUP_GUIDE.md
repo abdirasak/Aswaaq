@@ -58,7 +58,7 @@ Pick one of the options above and get your API key.
 
 ```bash
 # Navigate to your project
-cd c:\Users\abdi\Desktop\projects\iibiye
+cd c:\Users\abdi\Desktop\projects\aswaaq
 
 # Deploy the email function
 appwrite functions create \
@@ -116,14 +116,14 @@ Users will receive a professional email like this:
 
 ```
 ┌─────────────────────────────────────┐
-│           IIBIYE                    │
+│           Aswaaq                    │
 │     Password Reset Verification      │
 ├─────────────────────────────────────┤
 │                                     │
 │ Hello,                              │
 │                                     │
 │ You requested to reset your password │
-│ for your IIBIYE account. Use the    │
+│ for your Aswaaq account. Use the    │
 │ verification code below:            │
 │                                     │
 │         1 2 3 4 5 6                 │
@@ -135,7 +135,7 @@ Users will receive a professional email like this:
 │   please ignore                     │
 │                                     │
 │ Best regards,                       │
-│ The IIBIYE Team                     │
+│ The Aswaaq Team                     │
 └─────────────────────────────────────┘
 ```
 

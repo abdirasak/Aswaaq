@@ -3,12 +3,12 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { updateProfile } from '../../lib/appwrite';
@@ -60,10 +60,14 @@ const CountrySelection = () => {
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 40 }}>
         {/* Logo and Brand */}
         <View className="items-center mb-12">
-          <View className="w-20 h-20 bg-[#064229] rounded-full items-center justify-center mb-4">
-            <Ionicons name="bag-handle" size={40} color="#A3D139" />
+          <View className="shadow-md bg-white rounded-2xl overflow-hidden mb-4">
+            <Image
+              source={require('../../assets/images/aswaaq_logo.jpg')}
+              style={{ width: 80, height: 80 }}
+              contentFit="cover"
+            />
           </View>
-          <Text className="text-[#064229] font-bold tracking-[4px] text-lg uppercase">Adeegso</Text>
+          <Text className="text-[#064229] font-bold tracking-[4px] text-2xl uppercase">Aswaaq</Text>
         </View>
 
         {/* Title and Description */}

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createAd, getAdsByStatus, getAllAds, getAllCategories, getAllUserAds, updateAdStatus } from '../lib/appwrite';
+import { createAd, deleteAd, getAdsByStatus, getAllAds, getAllCategories, getAllUserAds, updateAd, updateAdStatus } from '../lib/appwrite';
 import { Ad, Category } from '../types';
 import { useAuthStore } from './auth.store';
 
@@ -31,6 +31,16 @@ interface AdsState {
     // Admin Actions
     fetchAdminAds: (status: string) => Promise<void>;
     updateAdStatus: (adId: string, status: 'approved' | 'rejected') => Promise<void>;
+    updateAd: (adId: string, adData: {
+        title: string;
+        description: string;
+        country: string;
+        city: string;
+        price: number;
+        images: string[];
+        categoryId: string;
+    }) => Promise<any>;
+    deleteAd: (adId: string) => Promise<void>;
     refreshAdminAds: () => Promise<void>;
 }
 
@@ -105,6 +115,31 @@ export const useAdsStore = create<AdsState>((set, get) => ({
             await get().fetchAds();
             set({ isLoading: false });
             return newAd;
+        } catch (error: any) {
+            set({ error: error.message, isLoading: false });
+            throw error;
+        }
+    },
+
+    updateAd: async (adId, adData) => {
+        set({ isLoading: true, error: null });
+        try {
+            const updatedAd = await updateAd(adId, adData);
+            await get().fetchUserAds(); // Refresh user ads
+            set({ isLoading: false });
+            return updatedAd;
+        } catch (error: any) {
+            set({ error: error.message, isLoading: false });
+            throw error;
+        }
+    },
+
+    deleteAd: async (adId) => {
+        set({ isLoading: true, error: null });
+        try {
+            await deleteAd(adId);
+            await get().fetchUserAds(); // Refresh user ads
+            set({ isLoading: false });
         } catch (error: any) {
             set({ error: error.message, isLoading: false });
             throw error;

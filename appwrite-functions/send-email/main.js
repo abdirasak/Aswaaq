@@ -7,11 +7,11 @@ const EMAIL_SERVICE = 'RESEND'; // Options: RESEND, SENDGRID, AWS_SES
 
 // Resend Configuration (Recommended)
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-const RESEND_FROM_EMAIL = 'noreply@iibiye.app';
+const RESEND_FROM_EMAIL = 'noreply@aswaaq.app';
 
 // SendGrid Configuration
 const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
-const SENDGRID_FROM_EMAIL = 'noreply@iibiye.app';
+const SENDGRID_FROM_EMAIL = 'noreply@aswaaq.app';
 
 export default async ({ req, res, log, error }) => {
   try {

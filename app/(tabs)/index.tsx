@@ -23,69 +23,13 @@ import { Categories } from '../../components/home/Categories';
 import { Cities } from '../../components/home/Cities';
 import { FeaturedAds } from '../../components/home/FeaturedAds';
 import { SearchBar } from '../../components/home/SearchBar';
+import { ShowAd } from '../../components/home/ShowAd';
 import { getFileUrl } from '../../lib/appwrite';
 import { useAdsStore } from '../../store/ads.store';
 import { useAuthStore } from '../../store/auth.store';
 import { useLikedAdsStore } from '../../store/likedads.store';
 
 // Memoized Recent Ad Card Component  
-const RecentAdCard = React.memo(({ item, onLikePress, isLiked }: any) => {
-  const router = useRouter();
-  const uri = useMemo(() => getFileUrl(item.images?.[0]), [item.images]);
-  
-  return (
-    <TouchableOpacity
-      onPress={() => router.push({
-        pathname: "/(tabs)/showAds",
-        params: { id: item.$id }
-      })}
-      className="bg-white rounded-2xl mb-4 overflow-hidden shadow-sm"
-      style={{ width: (width - 48) / 2 }}
-    >
-      <View className="relative">
-        {item.images && item.images.length > 0 ? (
-          <Image 
-            source={{ uri: uri || undefined }} 
-            style={{ width: '100%', height: 128 }}
-            contentFit="cover"
-            transition={200}
-            cachePolicy="memory-disk"
-            placeholder="blur"
-          />
-        ) : (
-        <View className="w-full h-32 bg-gray-200 items-center justify-center">
-          <Ionicons name="image-outline" size={32} color="#666" />
-        </View>
-        )}
-        {item.featured && (
-          <View className="absolute top-2 left-2 bg-primary px-2 py-0.5 rounded-md">
-            <Text className="text-white text-[10px] font-bold">Featured</Text>
-          </View>
-        )}
-        <TouchableOpacity 
-          onPress={onLikePress}
-          className="absolute top-2 right-2 bg-white/80 p-1.5 rounded-full"
-        >
-          <Ionicons 
-            name={isLiked ? "heart" : "heart-outline"} 
-            size={16} 
-            color={isLiked ? "#ff4d4d" : "#064229"} 
-          />
-        </TouchableOpacity>
-      </View>
-      <View className="p-3">
-        <Text className="text-primary font-bold text-base">${item.price}</Text>
-        <Text className="text-gray-800 font-semibold mt-1 text-xs" numberOfLines={1}>
-          {item.title}
-        </Text>
-        <View className="flex-row items-center mt-2">
-          <Ionicons name="location-outline" size={12} color="#A3D139" />
-          <Text className="text-gray-500 text-[10px] ml-1">{item.city}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-});
 
 const { width } = Dimensions.get('window');
 
@@ -301,16 +245,21 @@ const HomeScreen = () => {
         {/* Header & Search */}
         <View className="px-4 py-4 flex-row items-center justify-between">
           <View className="flex-row items-center">
-            <Image
-              source={require('../../assets/images/iibiye_logo.png')}
-              style={{ width: 56, height: 56 }}
-              contentFit="contain"
-            />
-            <Text className="ml-1 text-3xl font-bold text-primary tracking-tight">IIBIYE</Text>
+            <View className="shadow-sm bg-white rounded-xl overflow-hidden">
+              <Image
+                source={require('../../assets/images/aswaaq_logo.jpg')}
+                style={{ width: 56, height: 56 }}
+                contentFit="cover"
+              />
+            </View>
+            <Text className="ml-2 text-3xl font-bold text-primary tracking-tight">Aswaaq</Text>
           </View>
-          <View className="w-10 h-10 rounded-full bg-accent-orange/20 items-center justify-center">
+          <TouchableOpacity 
+            onPress={() => router.push('/(tabs)/profile')}
+            className="w-10 h-10 rounded-full bg-accent-orange/20 items-center justify-center"
+          >
              <Ionicons name="person-outline" size={24} color="#FF7D33" />
-          </View>
+          </TouchableOpacity>
         </View>
 
         <SearchBar
@@ -356,7 +305,7 @@ const HomeScreen = () => {
         <View className="px-4 mt-4 flex-row flex-wrap justify-between">
           {recentProducts.length > 0 ? (
             recentProducts.map((item) => (
-              <RecentAdCard
+              <ShowAd
                 key={item.$id}
                 item={item}
                 onLikePress={(e: GestureResponderEvent) => handleLikePress(item.$id, e)}

@@ -3,18 +3,19 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Linking,
-    NativeScrollEvent,
-    NativeSyntheticEvent,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Linking,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ShowAd } from '../../components/home/ShowAd';
 import { getAdById, getFileUrl, getUserProfile } from '../../lib/appwrite';
 import { useAdsStore } from '../../store/ads.store';
 import { useLikedAdsStore } from '../../store/likedads.store';
@@ -156,11 +157,11 @@ export default function ShowAds() {
   const uri = getFileUrl(img);
 
   return (
-    <View key={`${ad.$id}-${index}`} style={{ width, height: 400, backgroundColor: '#eee' }}>
+    <View key={`${ad.$id}-${index}`} style={{ width, height: 400, backgroundColor: '#f9f9f9' }}>
       <Image
         source={typeof uri === 'string' ? uri : (uri as any)?.toString()} 
         style={{ width: '100%', height: '100%' }}
-        contentFit="cover"
+        contentFit="contain"
         transition={300}
       />
     </View>
@@ -252,54 +253,14 @@ export default function ShowAds() {
                 contentContainerStyle={{ paddingRight: 16 }}
               >
                 {similarAds.map((item) => (
-                  <TouchableOpacity
-                    key={item.$id}
-                    onPress={() => router.push({
-                      pathname: "/(tabs)/showAds",
-                      params: { id: item.$id }
-                    })}
-                    className="bg-white rounded-2xl mr-3 shadow-sm overflow-hidden"
-                    style={{ width: 200 }}
-                  >
-                    <View className="relative">
-                      {item.images && item.images.length > 0 ? (
-                        <Image
-                          source={{ uri: getFileUrl(item.images[0]) || undefined }}
-                          style={{ width: '100%', height: 140 }}
-                          contentFit="cover"
-                          cachePolicy="memory-disk"
-                          transition={200}
-                        />
-                      ) : (
-                        <View className="w-full h-35 bg-gray-200 items-center justify-center">
-                          <Ionicons name="image-outline" size={32} color="#666" />
-                        </View>
-                      )}
-                      <TouchableOpacity
-                        onPress={(e) => {
-                          e.stopPropagation();
-                          toggleLike(item.$id);
-                        }}
-                        className="absolute top-2 right-2 bg-white/80 p-1.5 rounded-full"
-                      >
-                        <Ionicons
-                          name={likedAdIds.includes(item.$id) ? "heart" : "heart-outline"}
-                          size={16}
-                          color={likedAdIds.includes(item.$id) ? "#ff4d4d" : "#064229"}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                    <View className="p-3">
-                      <Text className="text-primary font-bold text-lg">${item.price}</Text>
-                      <Text className="text-gray-800 font-semibold mt-1 text-sm" numberOfLines={2}>
-                        {item.title}
-                      </Text>
-                      <View className="flex-row items-center mt-2">
-                        <Ionicons name="location-outline" size={12} color="#A3D139" />
-                        <Text className="text-gray-500 text-xs ml-1">{item.city}</Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
+                  <View key={item.$id} className="mr-3">
+                    <ShowAd
+                      item={item}
+                      isLiked={likedAdIds.includes(item.$id)}
+                      onLikePress={() => toggleLike(item.$id)}
+                      width={200}
+                    />
+                  </View>
                 ))}
               </ScrollView>
             </View>

@@ -150,13 +150,13 @@ export default function PostAd() {
               </TouchableOpacity>
 
               {images.map((uri, index) => (
-                <View key={index} className="w-24 h-24 rounded-2xl relative">
+                <View key={index} className="w-24 h-24 rounded-2xl relative bg-gray-50 overflow-hidden border border-gray-100">
                   <Image 
                     source={{ uri }} 
-                    style={{ width: '100%', height: '100%', borderRadius: 16 }}
-                    contentFit="cover"
+                    style={{ width: '100%', height: '100%' }}
+                    contentFit="contain"
                   />
-                  <TouchableOpacity onPress={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500 rounded-full p-1">
+                  <TouchableOpacity onPress={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500 rounded-full p-1 shadow-sm z-10">
                     <Ionicons name="close" size={12} color="white" />
                   </TouchableOpacity>
                 </View>

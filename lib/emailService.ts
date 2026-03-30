@@ -26,12 +26,12 @@ export const ProductionEmailService: EmailService = {
         },
         body: JSON.stringify({
           to: email,
-          subject: 'IIBIYE - Password Reset Code',
+          subject: 'Aswaaq - Password Reset Code',
           template: 'verification-code',
           data: {
             code: code,
             expirationMinutes: 10,
-            appName: 'IIBIYE'
+            appName: 'Aswaaq'
           }
         })
       });

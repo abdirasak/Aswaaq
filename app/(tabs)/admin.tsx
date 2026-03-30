@@ -173,12 +173,14 @@ const AdminDashboard = () => {
                     {/* Ad Content */}
                     <View className="flex-row">
                     {ad.images && ad.images.length > 0 ? (
-                        <Image 
-                          source={{ uri: getFileUrl(ad.images[0]) || undefined }} 
-                          style={{ width: 96, height: 96, borderRadius: 16 }}
-                          contentFit="cover"
-                          transition={200}
-                        />
+                        <View className="bg-gray-50 rounded-2xl overflow-hidden">
+                          <Image 
+                            source={{ uri: getFileUrl(ad.images[0]) || undefined }} 
+                            style={{ width: 96, height: 96 }}
+                            contentFit="contain"
+                            transition={200}
+                          />
+                        </View>
                     ) : (
                         <View className="w-24 h-24 rounded-2xl bg-gray-200 items-center justify-center">
                              <Ionicons name="image-outline" size={30} color="#999" />

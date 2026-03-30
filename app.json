@@ -1,23 +1,23 @@
 {
   "expo": {
-    "name": "iibiye",
-    "slug": "iibiye",
+    "name": "Aswaaq",
+    "slug": "aswaaq",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "iibiye-app",
+    "scheme": "aswaaq-app",
     "platforms": ["ios", "android"],
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.indexdesigns.iibiye"
+      "bundleIdentifier": "com.indexdesigns.aswaaq"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.indexdesigns.iibiye",
+      "package": "com.indexdesigns.aswaaq",
       "permissions": [
         "INTERNET",
         "READ_EXTERNAL_STORAGE",

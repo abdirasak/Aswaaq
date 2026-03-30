@@ -1,6 +1,6 @@
 {
     "projectId": "6983514d000c5210a822",
-    "projectName": "indexdesigns_iibiye",
+    "projectName": "indexdesigns_aswaaq",
     "endpoint": "https://fra.cloud.appwrite.io/v1",
     "settings": {
         "services": {
@@ -42,7 +42,7 @@
     "tablesDB": [
         {
             "$id": "6983541f00108593f07b",
-            "name": "iibiye",
+            "name": "aswaaq",
             "enabled": true
         }
     ],

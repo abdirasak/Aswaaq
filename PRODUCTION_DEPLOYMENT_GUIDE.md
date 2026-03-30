@@ -103,7 +103,7 @@ npm start
 
 ```bash
 # Navigate to project
-cd c:\Users\abdi\Desktop\projects\iibiye
+cd c:\Users\abdi\Desktop\projects\aswaaq
 
 # Deploy email function
 appwrite functions create --function-id send-email --runtime node-18.0

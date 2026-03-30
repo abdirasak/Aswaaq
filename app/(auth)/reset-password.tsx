@@ -114,11 +114,11 @@ const ResetPassword = () => {
                 >
                     {/* Logo & Header */}
                     <View className="items-center mb-8">
-                        <View className="w-20 h-20 rounded-[20px] items-center justify-center mb-4 shadow-sm">
+                        <View className="w-20 h-20 rounded-[18px] items-center justify-center mb-4 shadow-md bg-white">
                             <Image
-                                source={require('../../assets/images/iibiye_logo.png')}
-                                style={{ width: 80, height: 80 }}
-                                contentFit="contain"
+                                source={require('../../assets/images/aswaaq_logo.jpg')}
+                                style={{ width: 80, height: 80, borderRadius: 14 }}
+                                contentFit="cover"
                             />
                         </View>
                         <Text className="text-3xl font-bold text-primary mt-2">Reset Password</Text>

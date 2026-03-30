@@ -247,7 +247,7 @@ export default function Settings() {
         </TouchableOpacity>
 
         <Text className="text-center text-gray-400 text-xs mt-8 mb-4">
-          IIBIYE Version 1.0.0
+          Aswaaq Version 1.0.0
         </Text>
       </ScrollView>
 

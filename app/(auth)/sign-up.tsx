@@ -89,14 +89,14 @@ const SignUp = () => {
         >
           {/* Logo & Header */}
           <View className="items-center mb-8">
-            <View className="w-34 h-34 rounded-[24px] items-center justify-center mb-4 shadow-sm">
+            <View className="w-34 h-34 rounded-[28px] items-center justify-center mb-4 shadow-md bg-white">
               <Image
-                source={require('../../assets/images/iibiye_logo.png')}
-                style={{ width: 112, height: 112 }}
-                contentFit="contain"
+                source={require('../../assets/images/aswaaq_logo.jpg')}
+                style={{ width: 112, height: 112, borderRadius: 24 }}
+                contentFit="cover"
               />
             </View>
-            <Text className="text-4xl font-bold text-primary mt-2">Join IIBIYE</Text>
+            <Text className="text-4xl font-bold text-primary mt-2">Join Aswaaq</Text>
             <Text className="text-gray-500 mt-2 text-base text-center">
               Sign up to start buying and selling in the marketplace.
             </Text>
@@ -220,7 +220,7 @@ const SignUp = () => {
             <View className="flex-row items-start">
               <Ionicons name="checkmark-circle-outline" size={20} color="#10B981" className="mt-0.5" />
               <View className="ml-3 flex-1">
-                <Text className="text-green-900 font-semibold text-sm">Why Join IIBIYE?</Text>
+                <Text className="text-green-900 font-semibold text-sm">Why Join Aswaaq?</Text>
                 <Text className="text-green-700 text-xs mt-1 leading-4">
                   • Buy and sell items safely{'\n'}
                   • Connect with local sellers{'\n'}

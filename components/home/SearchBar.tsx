@@ -16,8 +16,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   isFilterActive
 }) => {
   return (
-    <View className="px-4 flex-row items-center gap-3">
-      <View className="flex-1 flex-row items-center bg-white rounded-2xl px-4 py-3 shadow-sm">
+    <View className="px-4">
+      <View className="flex-row items-center bg-white rounded-2xl px-4 py-3 shadow-sm">
         <Ionicons name="search-outline" size={20} color="#666" />
         <TextInput
           placeholder="Search ads..."
@@ -27,21 +27,18 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           returnKeyType="search"
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => onSearchChange('')}>
+          <TouchableOpacity onPress={() => onSearchChange('')} className="mr-2">
             <Ionicons name="close-circle" size={20} color="#ccc" />
           </TouchableOpacity>
         )}
+        <TouchableOpacity onPress={onFilterPress} className="p-2 rounded-full bg-primary">
+          <Ionicons 
+            name="options-outline" 
+            size={20} 
+            color="#F9F7E8" 
+          />
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity 
-        onPress={onFilterPress}
-        className={`p-3 rounded-2xl shadow-sm ${isFilterActive ? 'bg-primary' : 'bg-white'}`}
-      >
-        <Ionicons 
-          name="options-outline" 
-          size={24} 
-          color={isFilterActive ? '#F9F7E8' : '#064229'} 
-        />
-      </TouchableOpacity>
     </View>
   );
 };

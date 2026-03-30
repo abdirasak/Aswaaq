@@ -1,7 +1,7 @@
 # Project Code Snapshot
 
 ## lib/appwrite.ts
-**Path:** `c:\Users\abdi\Desktop\projects\iibiye\lib\appwrite.ts`
+**Path:** `c:\Users\abdi\Desktop\projects\aswaaq\lib\appwrite.ts`
 
 ```typescript
 import { Account, Client, Databases, ID, Query, Storage, ImageGravity } from "react-native-appwrite";
@@ -9,7 +9,7 @@ import { Account, Client, Databases, ID, Query, Storage, ImageGravity } from "re
 export const appwriteConfig = {
     endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!,
     projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!,
-    APPWRITE_PROJECT_NAME: "com.indexdesigns.iibiye",
+    APPWRITE_PROJECT_NAME: "com.indexdesigns.aswaaq",
     databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
     profileCollectionId: process.env.EXPO_PUBLIC_APPWRITE_PROFILE_COLLECTION_ID!,
     adsCollectionId: process.env.EXPO_PUBLIC_APPWRITE_ADS_COLLECTION_ID!,
@@ -284,7 +284,7 @@ export const getAllCategories = async () => {
 ```
 
 ## store/ads.store.ts
-**Path:** `c:\Users\abdi\Desktop\projects\iibiye\store\ads.store.ts`
+**Path:** `c:\Users\abdi\Desktop\projects\aswaaq\store\ads.store.ts`
 
 ```typescript
 import { create } from 'zustand';
@@ -419,7 +419,7 @@ export const useAdsStore = create<AdsState>((set, get) => ({
 ```
 
 ## app/(tabs)/postAd.tsx
-**Path:** `c:\Users\abdi\Desktop\projects\iibiye\app\(tabs)\postAd.tsx`
+**Path:** `c:\Users\abdi\Desktop\projects\aswaaq\app\(tabs)\postAd.tsx`
 
 ```tsx
 import { useAuthStore } from '@/store/auth.store';
@@ -667,7 +667,7 @@ export default function PostAd() {
 ```
 
 ## app/(tabs)/_layout.tsx
-**Path:** `c:\Users\abdi\Desktop\projects\iibiye\app\(tabs)\_layout.tsx`
+**Path:** `c:\Users\abdi\Desktop\projects\aswaaq\app\(tabs)\_layout.tsx`
 
 ```tsx
 import { useAuthStore } from '@/store/auth.store';
@@ -836,7 +836,7 @@ export default TabLayout;
 ```
 
 ## types/index.ts
-**Path:** `c:\Users\abdi\Desktop\projects\iibiye\types\index.ts`
+**Path:** `c:\Users\abdi\Desktop\projects\aswaaq\types\index.ts`
 
 ```typescript
 export type User = {
@@ -880,7 +880,7 @@ export type Category = {
 ```
 
 ## store/auth.store.ts
-**Path:** `c:\Users\abdi\Desktop\projects\iibiye\store\auth.store.ts`
+**Path:** `c:\Users\abdi\Desktop\projects\aswaaq\store\auth.store.ts`
 
 ```typescript
 import { getCurrentUser, signOut } from "@/lib/appwrite";
