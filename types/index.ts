@@ -28,6 +28,8 @@ export type Ad = {
     categoryId?: string;
     categories?: any; 
     featured?: boolean;
+    isSafe?: boolean;
+    safetyReason?: string;
     status?: 'active' | 'pending' | 'disapproved' | 'approved' | 'rejected';
 };
 

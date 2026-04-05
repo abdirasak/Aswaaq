@@ -9,12 +9,12 @@ interface SearchBarProps {
   isFilterActive: boolean;
 }
 
-export const SearchBar: React.FC<SearchBarProps> = ({
+export const SearchBar = React.memo(({
   searchQuery,
   onSearchChange,
   onFilterPress,
   isFilterActive
-}) => {
+}: SearchBarProps) => {
   return (
     <View className="px-4">
       <View className="flex-row items-center bg-white rounded-2xl px-4 py-3 shadow-sm">
@@ -41,6 +41,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       </View>
     </View>
   );
-};
+});
 
 export default SearchBar;

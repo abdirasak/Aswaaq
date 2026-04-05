@@ -16,17 +16,17 @@ interface FeaturedAdsProps {
   featuredProducts: Ad[];
   likedAdIds: string[];
   onAdPress: (adId: string) => void;
-  onLikePress: (adId: string, e: GestureResponderEvent) => void;
-  getFileUrl: (fileId: any) => string | null;
+  onLikePress: (id: string, e?: GestureResponderEvent) => void;
+  getFileUrl: (fileId: any, width?: number, height?: number, quality?: number) => string | null;
 }
 
-export const FeaturedAds: React.FC<FeaturedAdsProps> = ({
+export const FeaturedAds = React.memo(({
   featuredProducts,
   likedAdIds,
   onAdPress,
   onLikePress,
   getFileUrl
-}) => {
+}: FeaturedAdsProps) => {
   return (
     <View className="mt-8">
       <View className="px-4 flex-row justify-between items-center">
@@ -50,7 +50,7 @@ export const FeaturedAds: React.FC<FeaturedAdsProps> = ({
           <View key={item.$id} className="mr-3">
             <ShowAd
               item={item}
-              onLikePress={(e: GestureResponderEvent) => onLikePress(item.$id, e)}
+              onLikePress={onLikePress}
               isLiked={likedAdIds.includes(item.$id)}
               width={192}
             />
@@ -59,6 +59,6 @@ export const FeaturedAds: React.FC<FeaturedAdsProps> = ({
       </ScrollView>
     </View>
   );
-};
+});
 
 export default FeaturedAds;

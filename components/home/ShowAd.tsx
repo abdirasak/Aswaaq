@@ -21,22 +21,22 @@ interface Ad {
 interface ShowAdProps {
   item: Ad;
   isLiked?: boolean;
-  onLikePress?: (e: GestureResponderEvent) => void;
+  onLikePress?: (id: string, e?: GestureResponderEvent) => void;
   width?: number;
   height?: number;
   showLocation?: boolean;
 }
 
-export const ShowAd: React.FC<ShowAdProps> = ({ 
+export const ShowAd = React.memo(({ 
   item, 
   isLiked = false, 
   onLikePress, 
   width = (screenWidth - 48) / 2,
   height = 150,
   showLocation = true
-}) => {
+}: ShowAdProps) => {
   const router = useRouter();
-  const uri = item.images && item.images.length > 0 ? getFileUrl(item.images[0]) : null;
+  const uri = item.images && item.images.length > 0 ? getFileUrl(item.images[0], 400, 400, 80) : null;
 
   const handlePress = () => {
     router.push({
@@ -77,7 +77,7 @@ export const ShowAd: React.FC<ShowAdProps> = ({
           <TouchableOpacity 
             onPress={(e) => {
               e.stopPropagation();
-              onLikePress(e);
+              onLikePress(item.$id, e);
             }}
             className="absolute top-2 right-2 bg-white/80 p-1.5 rounded-full"
           >
@@ -105,6 +105,6 @@ export const ShowAd: React.FC<ShowAdProps> = ({
       </View>
     </TouchableOpacity>
   );
-};
+});
 
 export default ShowAd;

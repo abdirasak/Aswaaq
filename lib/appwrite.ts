@@ -8,6 +8,7 @@ export const appwriteConfig = {
     profileCollectionId: process.env.EXPO_PUBLIC_APPWRITE_PROFILE_COLLECTION_ID!,
     adsCollectionId: process.env.EXPO_PUBLIC_APPWRITE_ADS_COLLECTION_ID!,
     categoriesCollectionId: process.env.EXPO_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID!,
+    reportsCollectionId: process.env.EXPO_PUBLIC_APPWRITE_REPORTS_COLLECTION_ID!,
     storageId: process.env.EXPO_PUBLIC_APPWRITE_STORAGE_BUCKET_ID!,
 };
 
@@ -339,7 +340,7 @@ export const updateProfile = async (userId: string, data: { name?: string; email
 
 // --- STORAGE LOGIC ---
 
-export const uploadFile = async (fileUri: string) => {
+export const uploadFile = async (fileUri: string): Promise<string> => {
     try {
         const fileName = fileUri.split('/').pop() || `image_${Date.now()}.jpg`;
         const fileExtension = fileName.split('.').pop()?.toLowerCase();
@@ -360,35 +361,99 @@ export const uploadFile = async (fileUri: string) => {
 
         return response.$id;
     } catch (error: any) {
-        throw new Error(`Upload failed: ${error.message}`);
+        throw new Error(error.message || 'Failed to upload file');
     }
 }
 
-export const getFileUrl = (fileId: any) => {
+export const getFileUrl = (fileId: any, width?: number, height?: number, quality?: number) => {
     if (!fileId) return null;
 
     try {
         const actualId = typeof fileId === 'object' ? fileId.$id : fileId;
         if (!actualId || typeof actualId !== 'string') return null;
 
-        // Use /view for direct access. If this 404s, the file literally isn't in the bucket.
+        // If width or height is provided, use the preview endpoint for optimization
+        if (width || height) {
+            let url = `${appwriteConfig.endpoint}/storage/buckets/${appwriteConfig.storageId}/files/${actualId}/preview?project=${appwriteConfig.projectId}`;
+            if (width) url += `&width=${width}`;
+            if (height) url += `&height=${height}`;
+            if (quality) url += `&quality=${quality}`;
+            return url;
+        }
+
+        // Use /view for direct access to the original file
         return `${appwriteConfig.endpoint}/storage/buckets/${appwriteConfig.storageId}/files/${actualId}/view?project=${appwriteConfig.projectId}`;
     } catch (error) {
         return null;
     }
 }
 
+// --- SAFETY LOGIC ---
+
+export const checkAdSafety = (title: string, description: string): { isSafe: boolean; reason: string | null } => {
+    const blacklist = {
+        alcohol: ['beer', 'wine', 'liquor', 'alcohol', 'whisky', 'vodka', 'spirits'],
+        adult: ['sexy', 'naked', 'porn', 'sex', 'adult', 'xxx', 'nude', 'erotic'],
+        weapons: ['gun', 'ammo', 'knife', 'weapon', 'pistol', 'rifle', 'ammunition', 'dagger'],
+        drugs: ['drug', 'marijuana', 'weed', 'cocaine', 'heroin', 'meth', 'pill', 'pharmacy', 'medication']
+    };
+
+    // Clean text: remove non-alphanumeric characters and normalize spaces
+    const cleanText = (text: string) => {
+        return text.toLowerCase().replace(/[^a-z0-9]/g, '');
+    };
+
+    const combinedText = cleanText(title + description);
+
+    // Check for Alcohol
+    for (const word of blacklist.alcohol) {
+        if (combinedText.includes(word)) {
+            return { isSafe: false, reason: 'Alcohol-related content is prohibited' };
+        }
+    }
+
+    // Check for Adult Content
+    for (const word of blacklist.adult) {
+        if (combinedText.includes(word)) {
+            return { isSafe: false, reason: 'Nudity or adult content is prohibited' };
+        }
+    }
+
+    // Check for Weapons
+    for (const word of blacklist.weapons) {
+        if (combinedText.includes(word)) {
+            return { isSafe: false, reason: 'Weapons and ammunition are prohibited' };
+        }
+    }
+
+    // Check for Drugs
+    for (const word of blacklist.drugs) {
+        if (combinedText.includes(word)) {
+            return { isSafe: false, reason: 'Drug-related content is prohibited' };
+        }
+    }
+
+    return { isSafe: true, reason: null };
+};
+
 // --- ADS LOGIC ---
 
-export const getAllAds = async () => {
+export const getAllAds = async (country?: string) => {
     try {
+        const queries = [
+            Query.equal("status", "approved"), 
+            Query.orderDesc("$createdAt"),
+            Query.limit(100)
+        ];
+
+        if (country) {
+            queries.push(Query.equal("country", country));
+        }
+
         const ads = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.adsCollectionId,
-            [
-                Query.equal("status", "approved"), 
-                Query.orderDesc("$createdAt")      
-            ]
+            queries
         );
         return ads.documents;
     } catch (error: any) {
@@ -396,14 +461,21 @@ export const getAllAds = async () => {
     }
 };
 
-export const getAllUserAds = async () => {
+export const getAllUserAds = async (country?: string) => {
     try {
+        const queries = [
+            Query.orderDesc("$createdAt"),
+            Query.limit(100)
+        ];
+
+        if (country) {
+            queries.push(Query.equal("country", country));
+        }
+
         const ads = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.adsCollectionId,
-            [
-                Query.orderDesc("$createdAt")      
-            ]
+            queries
         );
         return ads.documents;
     } catch (error: any) {
@@ -413,10 +485,13 @@ export const getAllUserAds = async () => {
 
 export const createAd = async (adData: any) => {
     try {
-        const imageIds = [];
+        const safetyCheck = checkAdSafety(adData.title, adData.description);
+        const imageIds: string[] = [];
         for (const uri of adData.images) {
             const id = await uploadFile(uri);
-            imageIds.push(id);
+            if (id) {
+                imageIds.push(id);
+            }
         }
 
         return await databases.createDocument(
@@ -434,8 +509,32 @@ export const createAd = async (adData: any) => {
                 categories: adData.categoryId, // Map categoryId to categories
                 status: 'pending',
                 featured: false, // Default to false, can be updated by admin
+                isSafe: safetyCheck.isSafe,
+                safetyReason: safetyCheck.reason || '',
             }
-        );
+        ).catch(error => {
+            if (error.message.includes('Unknown attribute')) {
+                // Fallback for when attributes are not yet added to Appwrite
+                return databases.createDocument(
+                    appwriteConfig.databaseId,
+                    appwriteConfig.adsCollectionId,
+                    ID.unique(),
+                    {
+                        title: adData.title,
+                        description: adData.description,
+                        country: adData.country,
+                        city: adData.city,
+                        price: adData.price,
+                        images: imageIds,
+                        seller: adData.user_id,
+                        categories: adData.categoryId,
+                        status: 'pending',
+                        featured: false,
+                    }
+                );
+            }
+            throw error;
+        });
     } catch (error: any) {
         throw new Error(error.message);
     }
@@ -443,7 +542,8 @@ export const createAd = async (adData: any) => {
 
 export const updateAd = async (adId: string, adData: any) => {
     try {
-        const imageIds = [];
+        const safetyCheck = checkAdSafety(adData.title, adData.description);
+        const imageIds: string[] = [];
         
         // Handle images: if they are strings starting with 'http' or from Appwrite storage, they are already uploaded.
         // If they are local URIs, we need to upload them.
@@ -452,10 +552,12 @@ export const updateAd = async (adId: string, adData: any) => {
                 // If it's an ID (doesn't contain slashes) or a URL, keep it as is
                 // We store IDs in the database, so if it's already an ID, we just pass it back.
                 imageIds.push(image);
-            } else if (typeof image === 'string' && image.startsWith('file://') || image.includes('Cache') || image.includes('Picker')) {
+            } else if (typeof image === 'string' && (image.startsWith('file://') || image.includes('Cache') || image.includes('Picker'))) {
                 // It's a local file URI, upload it
                 const id = await uploadFile(image);
-                imageIds.push(id);
+                if (id) {
+                    imageIds.push(id);
+                }
             } else if (typeof image === 'object' && image.$id) {
                 // It's an Appwrite file object
                 imageIds.push(image.$id);
@@ -478,13 +580,36 @@ export const updateAd = async (adId: string, adData: any) => {
                 images: imageIds,
                 categories: adData.categoryId,
                 status: 'pending', // Reset to pending when edited
+                isSafe: safetyCheck.isSafe,
+                safetyReason: safetyCheck.reason || '',
             }
-        );
+        ).catch(error => {
+            if (error.message.includes('Unknown attribute')) {
+                // Fallback for when attributes are not yet added to Appwrite
+                return databases.updateDocument(
+                    appwriteConfig.databaseId,
+                    appwriteConfig.adsCollectionId,
+                    adId,
+                    {
+                        title: adData.title,
+                        description: adData.description,
+                        country: adData.country,
+                        city: adData.city,
+                        price: adData.price,
+                        images: imageIds,
+                        categories: adData.categoryId,
+                        status: 'pending',
+                    }
+                );
+            }
+            throw error;
+        });
     } catch (error: any) {
         throw new Error(error.message);
     }
 }
 
+// ... (rest of the code remains the same)
 export const deleteAd = async (adId: string) => {
     try {
         return await databases.deleteDocument(
@@ -664,5 +789,61 @@ export const initializeFeaturedField = async () => {
         return true;
     } catch (error: any) {
         throw new Error(`Failed to initialize featured field: ${error.message}`);
+    }
+};
+
+export const getReportsCount = async () => {
+    try {
+        const reports = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.reportsCollectionId,
+            [Query.limit(1)]
+        );
+
+        return typeof (reports as { total?: number }).total === 'number'
+            ? (reports as { total: number }).total
+            : reports.documents.length;
+    } catch (error: any) {
+        throw new Error(error.message);
+    }
+};
+
+export const getReports = async (limit = 50) => {
+    try {
+        const reports = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.reportsCollectionId,
+            [Query.orderDesc("$createdAt"), Query.limit(limit)]
+        );
+        return reports.documents;
+    } catch (error: any) {
+        throw new Error(error.message);
+    }
+};
+
+export const reportAd = async (adId: string, userId: string, reason: string, details: string) => {
+    if (!adId || !userId) {
+        throw new Error('Missing adId or userId for report');
+    }
+
+    try {
+        const reportData = {
+            adId: adId,
+            reporterID: userId,
+            reason: reason,
+            details: details
+        };
+        
+        console.log('Sending report to Appwrite:', reportData);
+        
+        return await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.reportsCollectionId,
+            ID.unique(),
+            reportData
+        );
+    } catch (error: any) {
+        console.error('Appwrite reportAd error:', error);
+        throw new Error(error.message);
     }
 };

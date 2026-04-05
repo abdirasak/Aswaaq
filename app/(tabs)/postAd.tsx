@@ -16,7 +16,7 @@ export default function PostAd() {
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [country, setCountry] = useState(selectedCountry?.toLowerCase() || 'kenya');
+  const [country, setCountry] = useState('');
   const [city, setCity] = useState('');
   const [price, setPrice] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -37,7 +37,9 @@ export default function PostAd() {
       try {
         const data = await getAllCategories();
         setCategories(data);
-        if (data.length > 0) setSelectedCategory(data[0].$id);
+        if (data.length > 0) {
+          // Don't auto-select, keep placeholder
+        }
       } catch (error) {
         // Error fetching categories
       } finally {
@@ -191,6 +193,7 @@ export default function PostAd() {
                     onValueChange={(itemValue) => setSelectedCategory(itemValue)}
                     style={{ height: 55 }}
                   >
+                    <Picker.Item label="Please select category" value="" enabled={false} />
                     {categories.map((cat) => (
                       <Picker.Item key={cat.$id} label={cat.name} value={cat.$id} />
                     ))}
@@ -203,7 +206,7 @@ export default function PostAd() {
             <View>
               <Text className="text-[#013B28] font-bold mb-2 ml-1">Title</Text>
               <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm">
-                <TextInput placeholder="Ex: iPhone 15 Pro Max" value={title} onChangeText={setTitle} className="py-4 text-[#013B28]" />
+                <TextInput placeholder="Enter ad title (e.g., iPhone 15 Pro Max)" value={title} onChangeText={setTitle} className="py-4 text-[#013B28]" />
               </View>
             </View>
 
@@ -213,6 +216,7 @@ export default function PostAd() {
                 <Text className="text-[#013B28] font-bold mb-2 ml-1">Country</Text>
                 <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                   <Picker selectedValue={country} onValueChange={(v) => setCountry(v)} style={{ height: 55 }}>
+                    <Picker.Item label="Please select country" value="" enabled={false} />
                     <Picker.Item label="Kenya" value="kenya" />
                     <Picker.Item label="Egypt" value="egypt" />
                   </Picker>
@@ -221,7 +225,7 @@ export default function PostAd() {
               <View className="flex-1">
                 <Text className="text-[#013B28] font-bold mb-2 ml-1">City</Text>
                 <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm">
-                  <TextInput placeholder="Ex: Nairobi" value={city} onChangeText={setCity} className="py-4 text-[#013B28]" />
+                  <TextInput placeholder="Enter city name (e.g., Nairobi)" value={city} onChangeText={setCity} className="py-4 text-[#013B28]" />
                 </View>
               </View>
             </View>
@@ -230,7 +234,7 @@ export default function PostAd() {
             <View>
               <Text className="text-[#013B28] font-bold mb-2 ml-1">Description</Text>
               <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm">
-                <TextInput placeholder="Describe your item..." value={description} onChangeText={setDescription} multiline className="py-4 text-[#013B28] h-32" textAlignVertical="top" />
+                <TextInput placeholder="Provide detailed description of your item including condition, features, and any other relevant information..." value={description} onChangeText={setDescription} multiline className="py-4 text-[#013B28] h-32" textAlignVertical="top" />
               </View>
             </View>
 
@@ -239,7 +243,7 @@ export default function PostAd() {
               <Text className="text-[#013B28] font-bold mb-2 ml-1">Price ($)</Text>
               <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm flex-row items-center">
                 <Text className="text-gray-400 mr-2 font-bold">$</Text>
-                <TextInput placeholder="0.00" value={price} onChangeText={setPrice} keyboardType="numeric" className="flex-1 py-4 text-[#013B28]" />
+                <TextInput placeholder="Enter price (e.g., 299.99)" value={price} onChangeText={setPrice} keyboardType="numeric" className="flex-1 py-4 text-[#013B28]" />
               </View>
             </View>
 

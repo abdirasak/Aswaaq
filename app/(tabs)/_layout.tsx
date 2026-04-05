@@ -156,6 +156,7 @@ const TabLayout = () => {
       <Tabs.Screen name="showAds" options={{ href: null }} />
       <Tabs.Screen name="showCategory" options={{ href: null }} />
       <Tabs.Screen name="showCity" options={{ href: null }} />
+      <Tabs.Screen name="reports" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />
     </Tabs>
   );

@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
+  FlatList,
   GestureResponderEvent,
   Keyboard,
   KeyboardAvoidingView,
@@ -33,47 +34,39 @@ import { useLikedAdsStore } from '../../store/likedads.store';
 
 const { width } = Dimensions.get('window');
 
-const categoryImages: { [key: string]: any } = {
-  'Electronics': require('../../assets/images/Electronics.jpg'),
-  'Home Appliances': require('../../assets/images/Home Aplainces.jpg'),
-  'House Appliances': require('../../assets/images/Home Aplainces.jpg'), // User reported missing
-  'House Apliances': require('../../assets/images/Home Aplainces.jpg'), // User spelling
-  'House Aplainces': require('../../assets/images/Home Aplainces.jpg'), // Typo match
-  'Household Appliances': require('../../assets/images/Home Aplainces.jpg'),
-  'Household Appliance': require('../../assets/images/Home Aplainces.jpg'),
-  'Appliances': require('../../assets/images/Home Aplainces.jpg'),
-  'Appliance': require('../../assets/images/Home Aplainces.jpg'),
-  'Home Appliance': require('../../assets/images/Home Aplainces.jpg'), // Singular
-  'Home Aplainces': require('../../assets/images/Home Aplainces.jpg'), // Typo match
-  'Home Aplience': require('../../assets/images/Home Aplainces.jpg'), // Another potential typo
-  'House For Sale': require('../../assets/images/House For Sale.jpg'),
-  'Property for Sale': require('../../assets/images/House For Sale.jpg'), // User requested
-  'House for rent': require('../../assets/images/House for rent.jpg'),
-  'Property for Rent': require('../../assets/images/House for rent.jpg'), // User requested
-  'Real Estate': require('../../assets/images/House For Sale.jpg'),
-  'Fashion': require('../../assets/images/clothes.jpg'),
-  'Clothes': require('../../assets/images/clothes.jpg'),
-  'Furniture': require('../../assets/images/furniture.jpg'),
-  'Jobs': require('../../assets/images/jobs.png'),
-  'Services': require('../../assets/images/services.jpg'),
-  'Vehicles': require('../../assets/images/vehicles.jpg'),
-  'Vehicle': require('../../assets/images/vehicles.jpg'), // Singular
-  'Cars': require('../../assets/images/vehicles.jpg'),
+const defaultCategoryImage = require('../../assets/images/aswaaq_logo.jpg');
+
+// Simplified category image mapping with 9 unique core assets
+const categoryImages: Record<string, any> = {
+  'electronics': require('../../assets/images/Electronics.jpg'),
+  'home appliances': require('../../assets/images/Home Aplainces.jpg'),
+  'house for sale': require('../../assets/images/House For Sale.jpg'),
+  'house for rent': require('../../assets/images/House for rent.jpg'),
+  'fashion': require('../../assets/images/clothes.jpg'),
+  'furniture': require('../../assets/images/furniture.jpg'),
+  'jobs': require('../../assets/images/jobs.jpg'),
+  'services': require('../../assets/images/services.jpg'),
+  'vehicles': require('../../assets/images/vehicles.png'),
 };
 
-const getCategoryImage = (name: string) => {
-  if (!name) return { uri: 'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=400' };
-  const cleanName = name.trim();
-
-  // Try exact match
+const getCategoryImage = (name?: string) => {
+  if (!name || typeof name !== 'string') return defaultCategoryImage;
+  
+  const cleanName = name.trim().toLowerCase();
+  
+  // 1. Direct match check
   if (categoryImages[cleanName]) return categoryImages[cleanName];
   
-  // Try case-insensitive match
-  const key = Object.keys(categoryImages).find(k => k.toLowerCase() === cleanName.toLowerCase());
-  if (key) return categoryImages[key];
+  // 2. Keyword-based fallback for robustness
+  if (cleanName.includes('appliance')) return categoryImages['home appliances'];
+  if (cleanName.includes('sale') || cleanName.includes('estate') || cleanName.includes('property')) return categoryImages['house for sale'];
+  if (cleanName.includes('rent')) return categoryImages['house for rent'];
+  if (cleanName.includes('fashion') || cleanName.includes('cloth')) return categoryImages['fashion'];
+  if (cleanName.includes('vehicle') || cleanName.includes('car')) return categoryImages['vehicles'];
+  if (cleanName.includes('electronic')) return categoryImages['electronics'];
   
-  // Default fallback
-  return { uri: 'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=400' };
+  // 3. Final default fallback
+  return defaultCategoryImage;
 };
 
 const HomeScreen = () => {
@@ -196,7 +189,7 @@ const HomeScreen = () => {
   }, [filteredAds]);
   
   const recentProducts = useMemo(() => {
-    const recent = filteredAds.slice(0, 20);
+    const recent = filteredAds.slice(0, 50);
     return recent;
   }, [filteredAds]);
 
@@ -234,92 +227,97 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
+      <FlatList
+        data={recentProducts}
+        keyExtractor={(item) => item.$id}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 16 }}
         contentContainerStyle={{ paddingBottom: 140 }}
-        removeClippedSubviews={true}
-        scrollEventThrottle={16}
-        decelerationRate="normal"
-        directionalLockEnabled={true}
-      >
-        {/* Header & Search */}
-        <View className="px-4 py-4 flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <View className="shadow-sm bg-white rounded-xl overflow-hidden">
-              <Image
-                source={require('../../assets/images/aswaaq_logo.jpg')}
-                style={{ width: 56, height: 56 }}
-                contentFit="cover"
-              />
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={Platform.OS === 'android'}
+        initialNumToRender={6}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        ListHeaderComponent={
+          <>
+            {/* Header & Search */}
+            <View className="px-4 py-4 flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <View className="shadow-sm bg-white rounded-xl overflow-hidden">
+                  <Image
+                    source={require('../../assets/images/aswaaq_logo.jpg')}
+                    style={{ width: 56, height: 56 }}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    transition={200}
+                  />
+                </View>
+                <Text className="ml-2 text-3xl font-bold text-primary tracking-tight">Aswaaq</Text>
+              </View>
+              <TouchableOpacity 
+                onPress={() => router.push('/(tabs)/profile')}
+                className="w-10 h-10 rounded-full bg-accent-orange/20 items-center justify-center"
+              >
+                 <Ionicons name="person-outline" size={24} color="#FF7D33" />
+              </TouchableOpacity>
             </View>
-            <Text className="ml-2 text-3xl font-bold text-primary tracking-tight">Aswaaq</Text>
-          </View>
-          <TouchableOpacity 
-            onPress={() => router.push('/(tabs)/profile')}
-            className="w-10 h-10 rounded-full bg-accent-orange/20 items-center justify-center"
-          >
-             <Ionicons name="person-outline" size={24} color="#FF7D33" />
-          </TouchableOpacity>
-        </View>
 
-        <SearchBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onFilterPress={() => setFilterModalVisible(true)}
-          isFilterActive={isFilterActive}
-        />
+            <SearchBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onFilterPress={() => setFilterModalVisible(true)}
+              isFilterActive={isFilterActive}
+            />
 
-        {/* Cities */}
-        <Cities
-          cityStats={cityStats}
-          selectedCity={selectedCity}
-          onCitySelect={setSelectedCity}
-        />
+            {/* Cities */}
+            <Cities
+              cityStats={cityStats}
+              selectedCity={selectedCity}
+              onCitySelect={setSelectedCity}
+            />
 
-        {/* Categories */}
-        <Categories
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onCategorySelect={setSelectedCategory}
-          getCategoryImage={getCategoryImage}
-        />
+            {/* Categories */}
+            <Categories
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategorySelect={setSelectedCategory}
+              getCategoryImage={getCategoryImage}
+            />
 
-        {/* Featured Ads */}
-        <FeaturedAds
-          featuredProducts={featuredProducts}
-          likedAdIds={likedAdIds}
-          onAdPress={handleAdPress}
-          onLikePress={handleLikePress}
-          getFileUrl={getFileUrl}
-        />
+            {/* Featured Ads */}
+            <FeaturedAds
+              featuredProducts={featuredProducts}
+              likedAdIds={likedAdIds}
+              onAdPress={handleAdPress}
+              onLikePress={handleLikePress}
+              getFileUrl={getFileUrl}
+            />
 
-        {/* Recently Added */}
-        <View className="mt-8 px-4 flex-row justify-between items-center">
-          <Text className="text-xl font-bold text-primary">Recently Added</Text>
-          <TouchableOpacity>
-            <Text className="text-primary/60 font-semibold">See all</Text>
-          </TouchableOpacity>
-        </View>
-        
-        {/* Two-Column Grid for Recently Added */}
-        <View className="px-4 mt-4 flex-row flex-wrap justify-between">
-          {recentProducts.length > 0 ? (
-            recentProducts.map((item) => (
-              <ShowAd
-                key={item.$id}
-                item={item}
-                onLikePress={(e: GestureResponderEvent) => handleLikePress(item.$id, e)}
-                isLiked={likedAdIds.includes(item.$id)}
-              />
-            ))
-          ) : (
-            <View className="w-full items-center py-10">
+            {/* Recently Added Title */}
+            <View className="mt-8 px-4 flex-row justify-between items-center mb-4">
+              <Text className="text-xl font-bold text-primary">Recently Added</Text>
+              <TouchableOpacity>
+                <Text className="text-primary/60 font-semibold">See all</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        }
+        renderItem={({ item }) => (
+          <ShowAd
+            item={item}
+            onLikePress={handleLikePress}
+            isLiked={likedAdIds.includes(item.$id)}
+          />
+        )}
+        ListEmptyComponent={
+          !isLoading ? (
+            <View className="w-full items-center py-10 px-4">
               <Ionicons name="search-outline" size={48} color="#ccc" />
-              <Text className="text-gray-400 mt-2">No ads found in {selectedCountry || 'this region'}</Text>
+              <Text className="text-gray-400 mt-2 text-center">No ads found in {selectedCountry || 'this region'}</Text>
             </View>
-          )}
-        </View>
-      </ScrollView>
+          ) : null
+        }
+      />
 
       {/* Filter Modal */}
       <Modal

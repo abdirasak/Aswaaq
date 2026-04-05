@@ -17,11 +17,11 @@ interface CitiesProps {
   onCitySelect: (city: string) => void;
 }
 
-export const Cities: React.FC<CitiesProps> = ({
+export const Cities = React.memo(({
   cityStats,
   selectedCity,
   onCitySelect
-}) => {
+}: CitiesProps) => {
   return (
     <View className="mt-6">
       <View className="px-4 flex-row items-center justify-between mb-3">
@@ -77,6 +77,6 @@ export const Cities: React.FC<CitiesProps> = ({
       </ScrollView>
     </View>
   );
-};
+});
 
 export default Cities;

@@ -3,21 +3,24 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  Linking,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    Linking,
+    Modal,
+    NativeScrollEvent,
+    NativeSyntheticEvent,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ShowAd } from '../../components/home/ShowAd';
-import { getAdById, getFileUrl, getUserProfile } from '../../lib/appwrite';
+import { getAdById, getFileUrl, getUserProfile, reportAd } from '../../lib/appwrite';
 import { useAdsStore } from '../../store/ads.store';
+import { useAuthStore } from '../../store/auth.store';
 import { useLikedAdsStore } from '../../store/likedads.store';
 import { Ad } from '../../types';
 
@@ -27,11 +30,18 @@ export default function ShowAds() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { ads } = useAdsStore();
+  const { user } = useAuthStore();
   const { likedAdIds, toggleLike } = useLikedAdsStore();
   const [ad, setAd] = useState<Ad | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [similarAds, setSimilarAds] = useState<Ad[]>([]);
+  
+  // Report Modal State
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
+  const [isReporting, setIsReporting] = useState(false);
 
   const isLiked = ad ? likedAdIds.includes(ad.$id) : false;
 
@@ -95,6 +105,37 @@ export default function ShowAds() {
     }
   };
 
+  const handleReportAd = async () => {
+    if (!user) {
+      Alert.alert('Authentication Required', 'Please log in to report this ad.');
+      return;
+    }
+
+    if (!reportReason.trim()) {
+      Alert.alert('Error', 'Please provide a reason for reporting.');
+      return;
+    }
+
+    try {
+      setIsReporting(true);
+      await reportAd(
+        ad!.$id,
+        user.$id,
+        reportReason,
+        reportDetails
+      );
+      
+      Alert.alert('Success', 'Thank you for your report. We will investigate this ad.');
+      setIsReportModalVisible(false);
+      setReportReason('');
+      setReportDetails('');
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to submit report. Please try again.');
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 bg-[#FDFBF7] items-center justify-center">
@@ -153,20 +194,20 @@ export default function ShowAds() {
                 scrollEventThrottle={16}
                 showsHorizontalScrollIndicator={false}
               >
-{ad.images.map((img, index) => {
-  const uri = getFileUrl(img);
+                {ad.images.map((img, index) => {
+                  const uri = getFileUrl(img);
 
-  return (
-    <View key={`${ad.$id}-${index}`} style={{ width, height: 400, backgroundColor: '#f9f9f9' }}>
-      <Image
-        source={typeof uri === 'string' ? uri : (uri as any)?.toString()} 
-        style={{ width: '100%', height: '100%' }}
-        contentFit="contain"
-        transition={300}
-      />
-    </View>
-  );
-})}
+                  return (
+                    <View key={`${ad.$id}-${index}`} style={{ width, height: 400, backgroundColor: '#f9f9f9' }}>
+                      <Image
+                        source={typeof uri === 'string' ? uri : (uri as any)?.toString()} 
+                        style={{ width: '100%', height: '100%' }}
+                        contentFit="contain"
+                        transition={300}
+                      />
+                    </View>
+                  );
+                })}
               </ScrollView>
               
               {/* Image Dots */}
@@ -243,6 +284,15 @@ export default function ShowAds() {
             </Text>
           </View>
 
+          {/* Report Button */}
+          <TouchableOpacity 
+            onPress={() => setIsReportModalVisible(true)}
+            className="mt-8 flex-row items-center justify-center py-3 border border-red-200 rounded-xl bg-red-50"
+          >
+            <Ionicons name="flag-outline" size={18} color="#dc2626" />
+            <Text className="ml-2 text-red-600 font-semibold">Report this Ad</Text>
+          </TouchableOpacity>
+
           {/* Similar Ads */}
           {similarAds.length > 0 && (
             <View className="mt-8">
@@ -258,7 +308,9 @@ export default function ShowAds() {
                       item={item}
                       isLiked={likedAdIds.includes(item.$id)}
                       onLikePress={() => toggleLike(item.$id)}
-                      width={200}
+                      width={140}
+                      height={120}
+                      showLocation={false}
                     />
                   </View>
                 ))}
@@ -267,6 +319,67 @@ export default function ShowAds() {
           )}
         </View>
       </ScrollView>
+
+      {/* Report Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isReportModalVisible}
+        onRequestClose={() => setIsReportModalVisible(false)}
+      >
+        <View className="flex-1 justify-end bg-black/50">
+          <View className="bg-white rounded-t-3xl p-6">
+            <View className="flex-row justify-between items-center mb-6">
+              <Text className="text-xl font-bold text-[#064229]">Report Ad</Text>
+              <TouchableOpacity onPress={() => setIsReportModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <Text className="text-gray-600 mb-2 font-medium">Reason for reporting</Text>
+            <View className="bg-gray-100 rounded-xl mb-4">
+              <TextInput
+                placeholder="e.g. Scam, Fraud, Inappropriate content"
+                value={reportReason}
+                onChangeText={setReportReason}
+                className="p-4 text-gray-800"
+              />
+            </View>
+
+            <Text className="text-gray-600 mb-2 font-medium">Additional details (optional)</Text>
+            <View className="bg-gray-100 rounded-xl mb-6">
+              <TextInput
+                placeholder="Provide more details about why you are reporting this ad..."
+                value={reportDetails}
+                onChangeText={setReportDetails}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+                className="p-4 text-gray-800 h-32"
+              />
+            </View>
+
+            <TouchableOpacity 
+              onPress={handleReportAd}
+              disabled={isReporting}
+              className={`py-4 rounded-2xl items-center justify-center ${isReporting ? 'bg-gray-400' : 'bg-red-600'}`}
+            >
+              {isReporting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-white font-bold text-lg">Submit Report</Text>
+              )}
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              onPress={() => setIsReportModalVisible(false)}
+              className="mt-3 py-3 items-center"
+            >
+              <Text className="text-gray-500 font-medium">Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

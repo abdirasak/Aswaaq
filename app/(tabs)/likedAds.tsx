@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Dimensions, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ShowAd } from '../../components/home/ShowAd';
@@ -36,11 +36,15 @@ export default function LikedAds() {
     return ads.filter(ad => likedAdIds.includes(ad.$id));
   }, [ads, likedAdIds]);
 
+  const handleLikePress = useCallback((id: string) => {
+    toggleLike(id);
+  }, [toggleLike]);
+
   const renderItem = ({ item }: { item: any }) => (
     <ShowAd
       item={item}
       isLiked={true}
-      onLikePress={() => toggleLike(item.$id)}
+      onLikePress={handleLikePress}
     />
   );
 
