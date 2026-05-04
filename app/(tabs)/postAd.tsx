@@ -173,11 +173,11 @@ export default function PostAd() {
             <View className="flex-row gap-x-4 mb-2">
               <View className="flex-1">
                 <Text className="text-gray-500 text-xs mb-1 ml-1">Your Email</Text>
-                <TextInput value={userEmail} editable={false} className="bg-gray-100 p-3 rounded-xl text-gray-400 border border-gray-200" />
+                <TextInput value={userEmail} editable={false} placeholderTextColor="#9CA3AF" style={{ color: '#9CA3AF', backgroundColor: '#F3F4F6', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB' }} />
               </View>
               <View className="flex-1">
                 <Text className="text-gray-500 text-xs mb-1 ml-1">Your Phone</Text>
-                <TextInput value={userPhone} editable={false} className="bg-gray-100 p-3 rounded-xl text-gray-400 border border-gray-200" />
+                <TextInput value={userPhone} editable={false} placeholderTextColor="#9CA3AF" style={{ color: '#9CA3AF', backgroundColor: '#F3F4F6', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB' }} />
               </View>
             </View>
 
@@ -191,11 +191,13 @@ export default function PostAd() {
                   <Picker
                     selectedValue={selectedCategory}
                     onValueChange={(itemValue) => setSelectedCategory(itemValue)}
-                    style={{ height: 55 }}
+                    style={{ height: 55, width: '100%', color: '#013B28' }}
+                    dropdownIconColor="#013B28"
+                    mode="dropdown"
                   >
-                    <Picker.Item label="Please select category" value="" enabled={false} />
+                    <Picker.Item label="Please select category" value="" enabled={false} color="#9CA3AF" />
                     {categories.map((cat) => (
-                      <Picker.Item key={cat.$id} label={cat.name} value={cat.$id} />
+                      <Picker.Item key={cat.$id} label={cat.name} value={cat.$id} color="#013B28" />
                     ))}
                   </Picker>
                 )}
@@ -206,7 +208,7 @@ export default function PostAd() {
             <View>
               <Text className="text-[#013B28] font-bold mb-2 ml-1">Title</Text>
               <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm">
-                <TextInput placeholder="Enter ad title (e.g., iPhone 15 Pro Max)" value={title} onChangeText={setTitle} className="py-4 text-[#013B28]" />
+                <TextInput placeholder="Enter ad title (e.g., iPhone 15 Pro Max)" value={title} onChangeText={setTitle} placeholderTextColor="#9CA3AF" style={{ paddingVertical: 16, color: '#013B28', fontSize: 14 }} />
               </View>
             </View>
 
@@ -215,17 +217,17 @@ export default function PostAd() {
               <View className="flex-1">
                 <Text className="text-[#013B28] font-bold mb-2 ml-1">Country</Text>
                 <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                  <Picker selectedValue={country} onValueChange={(v) => setCountry(v)} style={{ height: 55 }}>
-                    <Picker.Item label="Please select country" value="" enabled={false} />
-                    <Picker.Item label="Kenya" value="kenya" />
-                    <Picker.Item label="Egypt" value="egypt" />
+                  <Picker selectedValue={country} onValueChange={(v) => setCountry(v)} style={{ height: 55, width: '100%', color: '#013B28' }} dropdownIconColor="#013B28" mode="dropdown">
+                    <Picker.Item label="Please select country" value="" enabled={false} color="#9CA3AF" />
+                    <Picker.Item label="Kenya" value="kenya" color="#013B28" />
+                    <Picker.Item label="Egypt" value="egypt" color="#013B28" />
                   </Picker>
                 </View>
               </View>
               <View className="flex-1">
                 <Text className="text-[#013B28] font-bold mb-2 ml-1">City</Text>
                 <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm">
-                  <TextInput placeholder="Enter city name (e.g., Nairobi)" value={city} onChangeText={setCity} className="py-4 text-[#013B28]" />
+                  <TextInput placeholder="Enter city name (e.g., Nairobi)" value={city} onChangeText={setCity} placeholderTextColor="#9CA3AF" style={{ paddingVertical: 16, color: '#013B28', fontSize: 14 }} />
                 </View>
               </View>
             </View>
@@ -234,7 +236,7 @@ export default function PostAd() {
             <View>
               <Text className="text-[#013B28] font-bold mb-2 ml-1">Description</Text>
               <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm">
-                <TextInput placeholder="Provide detailed description of your item including condition, features, and any other relevant information..." value={description} onChangeText={setDescription} multiline className="py-4 text-[#013B28] h-32" textAlignVertical="top" />
+                <TextInput placeholder="Provide detailed description of your item including condition, features, and any other relevant information..." value={description} onChangeText={setDescription} multiline placeholderTextColor="#9CA3AF" style={{ paddingVertical: 16, color: '#013B28', fontSize: 14, height: 128, textAlignVertical: 'top' }} />
               </View>
             </View>
 
@@ -243,7 +245,7 @@ export default function PostAd() {
               <Text className="text-[#013B28] font-bold mb-2 ml-1">Price ($)</Text>
               <View className="bg-white rounded-2xl border border-gray-100 px-4 shadow-sm flex-row items-center">
                 <Text className="text-gray-400 mr-2 font-bold">$</Text>
-                <TextInput placeholder="Enter price (e.g., 299.99)" value={price} onChangeText={setPrice} keyboardType="numeric" className="flex-1 py-4 text-[#013B28]" />
+                <TextInput placeholder="Enter price (e.g., 299.99)" value={price} onChangeText={setPrice} keyboardType="numeric" placeholderTextColor="#9CA3AF" style={{ flex: 1, paddingVertical: 16, color: '#013B28', fontSize: 14 }} />
               </View>
             </View>
 

@@ -5,12 +5,14 @@ import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
     Alert,
+    Keyboard,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     View
 } from 'react-native';
 
@@ -68,6 +70,7 @@ const SignIn = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ flexGrow: 1 }}
@@ -171,6 +174,7 @@ const SignIn = () => {
             </View>
           </View>
         </ScrollView>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
